@@ -1,0 +1,28 @@
+TODO::
+
+Create high scores for each level
+
+Add some sound effects
+
+Encrypt local storage
+
+Make an APK file
+
+Make Balloons explode
+
+Make a different type of enemy
+
+Complete level 1
+
+Add Stars for passing levels
+
+Clean up interface a bit
+
+DONE::
+
+Add to git
+
+Create git branch
+
+Get level stepping working
+
