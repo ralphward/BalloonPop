@@ -1,6 +1,6 @@
 TODO::
 
-Create high scores for each level
+Save high scores for each level
 
 Add some sound effects
 
@@ -29,3 +29,6 @@ Get level stepping working
 Create custome enemies for each level
 
 Add ability to go to main screen from level passed screen
+
+Create high scores for each level
+

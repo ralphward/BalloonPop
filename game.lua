@@ -16,7 +16,9 @@ local levelData = require( "leveldata" )
 local currentScore          -- used to hold the numeric value of the current score
 local currentScoreDisplay   -- will be a display.newText() that draws the score on the screen
 local levelText             -- will be a display.newText() to let you know what level you're on
-local spawnTimer            -- will be used to hold the timer for the spawning engine
+--local spawnTimer            -- will be used to hold the timer for the spawning engine
+local topScore              -- will be used to store the best score for this level
+local currentTopScore       -- will be a display.newText() that draws the to score on the screen
 
 --
 -- define local functions here
@@ -47,6 +49,9 @@ local function handleEnemyTouch( event )
     if event.phase == "began" then
         currentScore = currentScore + 10
         currentScoreDisplay.text = string.format( "%06d", currentScore )
+        if currentScore > topScore then
+            currentTopScore.text = string.format( "%06d", currentScore ) 
+        end
         event.target:removeSelf()
         return true
     end
@@ -163,6 +168,8 @@ function scene:create( event )
     currentScoreDisplay = display.newText("000000", display.contentWidth - 50, 10, native.systemFont, 16 )
     sceneGroup:insert( currentScoreDisplay )
 
+    currentTopScore = display.newText("000000", display.contentWidth - 50, 30, native.systemFont, 16 )
+    sceneGroup:insert( currentTopScore )
     --
     -- these two buttons exist as a quick way to let you test
     -- going between scenes (as well as demo widget.newButton)
@@ -207,7 +214,8 @@ function scene:show( event )
     if event.phase == "did" then
         physics.start()
         transition.to( levelText, { time = 500, alpha = 0 } )
-        spawnTimer = timer.performWithDelay( 500, spawnEnemies )
+        --spawnTimer = timer.performWithDelay( 500, spawnEnemies )
+        timer.performWithDelay( 500, spawnEnemies )
 
     else -- event.phase == "will"
         -- The "will" phase happens before the scene transitions on screen.  This is a great
@@ -216,6 +224,13 @@ function scene:show( event )
         -- locations. In this case, reset the score to 0.
         currentScore = 0
         currentScoreDisplay.text = string.format( "%06d", currentScore )
+
+        if myData.settings.levels[myData.settings.currentLevel].topScore == nil then
+            currentTopScore.text = string.format( "%06d", currentScore )
+        else
+            currentTopScore.text = string.format( "%06d", myData.settings.levels[myData.settings.currentLevel].topScore )
+            topScore = myData.settings.levels[myData.settings.currentLevel].topScore
+        end
     end
 end
 
@@ -233,7 +248,7 @@ function scene:hide( event )
         -- stop timers, phsics, any audio playing
         --
         physics.stop()
-        timer.cancel( spawnTimer )
+        --timer.cancel( spawnTimer )
     end
 
 end

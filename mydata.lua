@@ -9,6 +9,8 @@ M.settings.bestScore = 0
 M.settings.soundOn = true
 M.settings.musicOn = true
 M.settings.levels = {} 
+M.settings.levels[1] = {}
+M.settings.levels[1].topScore = 0
 -- levels data members:
 --      .stars -- Stars earned per level
 --      .score -- Score for the level
