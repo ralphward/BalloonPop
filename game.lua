@@ -16,15 +16,23 @@ local levelData = require( "leveldata" )
 local currentScore          -- used to hold the numeric value of the current score
 local currentScoreDisplay   -- will be a display.newText() that draws the score on the screen
 local levelText             -- will be a display.newText() to let you know what level you're on
---local spawnTimer            -- will be used to hold the timer for the spawning engine
 local topScore              -- will be used to store the best score for this level
 local currentTopScore       -- will be a display.newText() that draws the to score on the screen
+local curLevel              -- will be used to hold the current level
 
 --
 -- define local functions here
 --
 local function handleWin( event )
+
     if event.phase == "ended" then
+        myData.settings.levels[curLevel].topScore = topScore
+        myData.settings.currentLevel = curLevel + 1
+        if myData.settings.unlockedLevels < myData.settings.currentLevel then
+            myData.settings.unlockedLevels = myData.settings.currentLevel
+        end
+        utility.saveTable(myData.settings, "settings.json")
+
         composer.removeScene("nextlevel")
         composer.gotoScene("nextlevel", { time= 500, effect = "crossFade" })
     end
@@ -51,6 +59,7 @@ local function handleEnemyTouch( event )
         currentScoreDisplay.text = string.format( "%06d", currentScore )
         if currentScore > topScore then
             currentTopScore.text = string.format( "%06d", currentScore ) 
+            topScore = currentScore
         end
         event.target:removeSelf()
         return true
@@ -92,9 +101,8 @@ end
 local function spawnEnemies()
     --
     -- Spawn a new enemy every second until canceled.
-    -- spawnTimer holds the handle to the timer so we can cancel it later later.
     --
-    E = levelData:getLevel(myData.settings.currentLevel)
+    E = levelData:getLevel(curLevel)
     for i, enemies in ipairs(E) do        
         local tm = timer.performWithDelay( enemies.timerDelay , spawnEnemy, 1 )
         tm.params = {radius = enemies.radius, fillColor = enemies.fillColor, xpos = enemies.xpos }
@@ -131,7 +139,7 @@ function scene:create( event )
     -- make a copy of the current level value out of our
     -- non-Global app wide storage table.
     --
-    local thisLevel = myData.settings.currentLevel
+    curLevel = myData.settings.currentLevel
 
     --
     -- create your objects here
@@ -152,7 +160,7 @@ function scene:create( event )
     -- levelText is going to be accessed from the scene:show function. It cannot be local to
     -- scene:create(). This is why it was declared at the top of the module so it can be seen 
     -- everywhere in this module
-    levelText = display.newText(myData.settings.currentLevel, 0, 0, native.systemFontBold, 48 )
+    levelText = display.newText(curLevel, 0, 0, native.systemFontBold, 48 )
     levelText:setFillColor( 0 )
     levelText.x = display.contentCenterX
     levelText.y = display.contentCenterY
@@ -214,7 +222,6 @@ function scene:show( event )
     if event.phase == "did" then
         physics.start()
         transition.to( levelText, { time = 500, alpha = 0 } )
-        --spawnTimer = timer.performWithDelay( 500, spawnEnemies )
         timer.performWithDelay( 500, spawnEnemies )
 
     else -- event.phase == "will"
@@ -225,11 +232,11 @@ function scene:show( event )
         currentScore = 0
         currentScoreDisplay.text = string.format( "%06d", currentScore )
 
-        if myData.settings.levels[myData.settings.currentLevel].topScore == nil then
+        if myData.settings.levels[curLevel].topScore == nil then
             currentTopScore.text = string.format( "%06d", currentScore )
         else
-            currentTopScore.text = string.format( "%06d", myData.settings.levels[myData.settings.currentLevel].topScore )
-            topScore = myData.settings.levels[myData.settings.currentLevel].topScore
+            currentTopScore.text = string.format( "%06d", myData.settings.levels[curLevel].topScore )
+            topScore = myData.settings.levels[curLevel].topScore
         end
     end
 end
@@ -248,7 +255,6 @@ function scene:hide( event )
         -- stop timers, phsics, any audio playing
         --
         physics.stop()
-        --timer.cancel( spawnTimer )
     end
 
 end

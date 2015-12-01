@@ -1,6 +1,12 @@
+~~~~~~~~~~~~~~
 TODO::
+~~~~~~~~~~~~~~
 
-Save high scores for each level
+Add particle effects for the balloon popping
+
+add something to color at the back
+
+Put particle effects on the object at the back
 
 Add some sound effects
 
@@ -18,7 +24,9 @@ Add Stars for passing levels
 
 Clean up interface a bit
 
+~~~~~~~~~~~~~~
 DONE::
+~~~~~~~~~~~~~~
 
 Add to git
 
@@ -32,3 +40,4 @@ Add ability to go to main screen from level passed screen
 
 Create high scores for each level
 
+Save high scores for each level

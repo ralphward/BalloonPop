@@ -13,6 +13,5 @@ M.settings.levels[1] = {}
 M.settings.levels[1].topScore = 0
 -- levels data members:
 --      .stars -- Stars earned per level
---      .score -- Score for the level
 -- 		.energyBonus -- Bonus for unused energy
 return M

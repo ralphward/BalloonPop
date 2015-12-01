@@ -40,11 +40,6 @@ function scene:create( event )
 
     params = event.params
         
-    myData.settings.currentLevel = myData.settings.currentLevel + 1
-    if myData.settings.unlockedLevels < myData.settings.currentLevel then
-        myData.settings.unlockedLevels = myData.settings.currentLevel
-    end
-    utility.saveTable(myData.settings, "settings.json")
     --
     -- setup a page background, really not that important though composer
     -- crashes out if there isn't a display object in the view.
