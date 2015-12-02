@@ -1,7 +1,6 @@
---Attack of the killer cubes
-
 local composer = require( "composer" )
 local scene = composer.newScene()
+local CBE = require("CBE.CBE")
 
 local widget = require( "widget" )
 local json = require( "json" )
@@ -19,6 +18,46 @@ local levelText             -- will be a display.newText() to let you know what 
 local topScore              -- will be used to store the best score for this level
 local currentTopScore       -- will be a display.newText() that draws the to score on the screen
 local curLevel              -- will be used to hold the current level
+
+local vent = CBE.newVent({
+    preset = "fountain",
+    title = "explosion",
+
+    positionType = "inRadius",
+    color = {{1, 1, 0}, {1, 0.5, 0}, {0.2, 0.2, 0.2}},
+    particleProperties = {blendMode = "add"},
+    emitX = display.contentCenterX,
+    emitY = display.contentCenterY,
+
+    emissionNum = 5,
+    emitDelay = 5,
+    perEmit = 1,
+
+    inTime = 100,
+    lifeTime = 0,
+    outTime = 600,
+
+    onCreation = function(particle)
+        particle:changeColor({
+            color = {0.1, 0.1, 0.1},
+            time = 600
+        })
+    end,
+
+    onUpdate = function(particle)
+        particle:setCBEProperty("scaleRateX", particle:getCBEProperty("scaleRateX") * 0.998)
+        particle:setCBEProperty("scaleRateY", particle:getCBEProperty("scaleRateY") * 0.998)
+    end,
+
+    physics = {
+        velocity = 0,
+        gravityY = -0.035,
+        angles = {0, 360},
+        scaleRateX = 1.05,
+        scaleRateY = 1.05
+    }
+})
+
 
 --
 -- define local functions here
@@ -62,8 +101,16 @@ local function handleEnemyTouch( event )
             topScore = currentScore
         end
         event.target:removeSelf()
+
+
+        vent.emitX = math.random(display.contentCenterX - display.contentWidth * 0.25, display.contentCenterX + display.contentWidth * 0.25)
+        vent.emitY = math.random(display.contentCenterY - display.contentHeight * 0.25, display.contentCenterY + display.contentHeight * 0.25)
+        vent:start()
+        
         return true
     end
+
+
 end
 
 local function spawnEnemy( event )
@@ -93,6 +140,7 @@ local function spawnEnemy( event )
     enemy:addEventListener( "touch", handleEnemyTouch )
 
     --
+
     -- Not needed in this implementation, but you may want to call spawnEnemy() to create one 
     -- and you might want to pass that enemy back to the caller.
     return enemy
