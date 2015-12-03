@@ -1,7 +1,6 @@
---Attack of the killer cubes
-
 local composer = require( "composer" )
 local scene = composer.newScene()
+local CBE = require("CBE.CBE")
 
 local widget = require( "widget" )
 local json = require( "json" )
@@ -16,13 +15,63 @@ local levelData = require( "leveldata" )
 local currentScore          -- used to hold the numeric value of the current score
 local currentScoreDisplay   -- will be a display.newText() that draws the score on the screen
 local levelText             -- will be a display.newText() to let you know what level you're on
-local spawnTimer            -- will be used to hold the timer for the spawning engine
+local topScore              -- will be used to store the best score for this level
+local currentTopScore       -- will be a display.newText() that draws the to score on the screen
+local curLevel              -- will be used to hold the current level
+
+local vent = CBE.newVent({
+    preset = "fountain",
+    title = "explosion",
+
+    positionType = "inRadius",
+    color = {{1, 0, 0}, {0.9, 0, 0}, {0.7, 0, 0}},
+    particleProperties = {blendMode = "add"},
+    emitX = display.contentCenterX,
+    emitY = display.contentCenterY,
+
+    emissionNum = 5,
+    emitDelay = 5,
+    perEmit = 1,
+
+    inTime = 100,
+    lifeTime = 0,
+    outTime = 200,
+
+    onCreation = function(particle)
+        particle:changeColor({
+            color = {0.1, 0.1, 0.1},
+            time = 600
+        })
+    end,
+
+    onUpdate = function(particle)
+        particle:setCBEProperty("scaleRateX", particle:getCBEProperty("scaleRateX") * 0.998)
+        particle:setCBEProperty("scaleRateY", particle:getCBEProperty("scaleRateY") * 0.998)
+    end,
+
+    physics = {
+        velocity = 0,
+        gravityY = 0,
+        angles = {0, 360},
+        scaleRateX = 1,
+        scaleRateY = 1
+    }
+})
+
 
 --
 -- define local functions here
 --
 local function handleWin( event )
+
     if event.phase == "ended" then
+        myData.settings.levels[curLevel].topScore = topScore
+        myData.settings.currentLevel = curLevel + 1
+        if myData.settings.unlockedLevels < myData.settings.currentLevel then
+            myData.settings.unlockedLevels = myData.settings.currentLevel
+        end
+        utility.saveTable(myData.settings, "settings.json")
+
         composer.removeScene("nextlevel")
         composer.gotoScene("nextlevel", { time= 500, effect = "crossFade" })
     end
@@ -47,9 +96,20 @@ local function handleEnemyTouch( event )
     if event.phase == "began" then
         currentScore = currentScore + 10
         currentScoreDisplay.text = string.format( "%06d", currentScore )
+        if currentScore > topScore then
+            currentTopScore.text = string.format( "%06d", currentScore ) 
+            topScore = currentScore
+        end
         event.target:removeSelf()
+
+        vent.emitX = event.x
+        vent.emitY = event.y
+        vent:start()
+        
         return true
     end
+
+
 end
 
 local function spawnEnemy( event )
@@ -60,16 +120,12 @@ local function spawnEnemy( event )
 
     -- generate a starting position on the screen, y will be off screen
     local params = event.source.params
-    local enemy = display.newCircle(params.xpos, -50, params.radius)
-    enemy:setFillColor( params.fillColor[1], params.fillColor[2], params.fillColor[3] )
-    -- 
-    -- must be inserted into the the group to be managed
-    --
+    local enemy = display.newImage(params.image, params.xpos, -50)
     sceneGroup:insert( enemy )
     --
     -- Add the physics body and the touch handler
     --
-    physics.addBody( enemy, "dynamic", { radius = params.radius } )
+    physics.addBody( enemy, "kinematic" )
     --
     -- Since the touch handler is on an "object" and not the whole screen, 
     -- you don't need to remove it. When Composer hides the scene, it can't be
@@ -78,7 +134,6 @@ local function spawnEnemy( event )
     -- will remove this listener.
     enemy:addEventListener( "touch", handleEnemyTouch )
 
-    --
     -- Not needed in this implementation, but you may want to call spawnEnemy() to create one 
     -- and you might want to pass that enemy back to the caller.
     return enemy
@@ -87,12 +142,11 @@ end
 local function spawnEnemies()
     --
     -- Spawn a new enemy every second until canceled.
-    -- spawnTimer holds the handle to the timer so we can cancel it later later.
     --
-    E = levelData:getLevel(myData.settings.currentLevel)
+    E = levelData:getLevel(curLevel)
     for i, enemies in ipairs(E) do        
         local tm = timer.performWithDelay( enemies.timerDelay , spawnEnemy, 1 )
-        tm.params = {radius = enemies.radius, fillColor = enemies.fillColor, xpos = enemies.xpos }
+        tm.params = {xpos = enemies.xpos,  xpos = enemies.xpos, image = enemies.image }
     end
 
 end
@@ -112,62 +166,33 @@ function scene:create( event )
     -- Composer to manage for you.
     local sceneGroup = self.view
 
-    -- 
-    -- You need to start the physics engine to be able to add objects to it, but...
-    --
     physics.start()
-    --
-    -- because the scene is off screen being created, we don't want the simulation doing
-    -- anything yet, so pause it for now.
-    --
     physics.pause()
 
-    --
-    -- make a copy of the current level value out of our
-    -- non-Global app wide storage table.
-    --
-    local thisLevel = myData.settings.currentLevel
+    curLevel = myData.settings.currentLevel
 
     --
     -- create your objects here
     --
-    
-    --
-    -- These pieces of the app only need created.  We won't be accessing them any where else
-    -- so it's okay to make it "local" here
-    --
+
+    -- setup local background    
     local background = display.newRect(display.contentCenterX, display.contentCenterY, display.contentWidth, display.contentHeight)
     background:setFillColor( 0.6, 0.7, 0.3 )
-    --
-    -- Insert it into the scene to be managed by Composer
-    --
     sceneGroup:insert(background)
 
-    --
-    -- levelText is going to be accessed from the scene:show function. It cannot be local to
-    -- scene:create(). This is why it was declared at the top of the module so it can be seen 
-    -- everywhere in this module
-    levelText = display.newText(myData.settings.currentLevel, 0, 0, native.systemFontBold, 48 )
+    levelText = display.newText(curLevel, 0, 0, native.systemFontBold, 48 )
     levelText:setFillColor( 0 )
     levelText.x = display.contentCenterX
     levelText.y = display.contentCenterY
-    --
-    -- Insert it into the scene to be managed by Composer
-    --
     sceneGroup:insert( levelText )
 
-    -- 
-    -- because we want to access this in multiple functions, we need to forward declare the variable and
-    -- then create the object here in scene:create()
-    --
     currentScoreDisplay = display.newText("000000", display.contentWidth - 50, 10, native.systemFont, 16 )
     sceneGroup:insert( currentScoreDisplay )
 
-    --
-    -- these two buttons exist as a quick way to let you test
-    -- going between scenes (as well as demo widget.newButton)
-    --
+    currentTopScore = display.newText("000000", display.contentWidth - 50, 30, native.systemFont, 16 )
+    sceneGroup:insert( currentTopScore )
 
+    -- TODO:: Remove these buttons
     local iWin = widget.newButton({
         label = "I Win!",
         onEvent = handleWin
@@ -207,7 +232,7 @@ function scene:show( event )
     if event.phase == "did" then
         physics.start()
         transition.to( levelText, { time = 500, alpha = 0 } )
-        spawnTimer = timer.performWithDelay( 500, spawnEnemies )
+        timer.performWithDelay( 500, spawnEnemies )
 
     else -- event.phase == "will"
         -- The "will" phase happens before the scene transitions on screen.  This is a great
@@ -216,6 +241,13 @@ function scene:show( event )
         -- locations. In this case, reset the score to 0.
         currentScore = 0
         currentScoreDisplay.text = string.format( "%06d", currentScore )
+
+        if myData.settings.levels[curLevel].topScore == nil then
+            currentTopScore.text = string.format( "%06d", currentScore )
+        else
+            currentTopScore.text = string.format( "%06d", myData.settings.levels[curLevel].topScore )
+            topScore = myData.settings.levels[curLevel].topScore
+        end
     end
 end
 
@@ -233,7 +265,6 @@ function scene:hide( event )
         -- stop timers, phsics, any audio playing
         --
         physics.stop()
-        timer.cancel( spawnTimer )
     end
 
 end
