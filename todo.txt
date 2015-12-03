@@ -2,6 +2,12 @@
 TODO::
 ~~~~~~~~~~~~~~
 
+Add a restart button
+
+Clean up interface a lot
+ - Levels should display custom tips at the start
+ - Congratulate the finished level better
+
 Make a better explosion
 
 Explode another object
@@ -22,11 +28,17 @@ Make a different type of enemy
 
 Complete level 1
 
+Complete level 2,3,4,5
+
 Add Stars for passing levels
 
-Clean up interface a lot
+adds for the game
 
-Add adds to the game
+~~~~~~~~~~~~~~
+BUGSS::
+~~~~~~~~~~~~~~
+
+None known at this point
 
 ~~~~~~~~~~~~~~
 GENERAL IDEAS::
@@ -75,4 +87,6 @@ Save high scores for each level
 Add particle effects for the balloon popping
 
 Make Balloons explode
+
+Add a pause button
 

@@ -18,6 +18,8 @@ local levelText             -- will be a display.newText() to let you know what 
 local topScore              -- will be used to store the best score for this level
 local currentTopScore       -- will be a display.newText() that draws the to score on the screen
 local curLevel              -- will be used to hold the current level
+local isPaused = false
+local timers = {}           -- Variable used to hold local scene timers
 
 local vent = CBE.newVent({
     preset = "fountain",
@@ -58,6 +60,20 @@ local vent = CBE.newVent({
     }
 })
 
+local function handlePause( event )
+
+    if event.phase == "ended" then
+        if isPaused == false then
+            physics.pause()
+            isPaused = true
+        elseif isPaused == true then
+            physics.start()
+            isPaused = false
+        end
+    end
+
+    return true
+end
 
 --
 -- define local functions here
@@ -71,7 +87,6 @@ local function handleWin( event )
             myData.settings.unlockedLevels = myData.settings.currentLevel
         end
         utility.saveTable(myData.settings, "settings.json")
-
         composer.removeScene("nextlevel")
         composer.gotoScene("nextlevel", { time= 500, effect = "crossFade" })
     end
@@ -125,7 +140,7 @@ local function spawnEnemy( event )
     --
     -- Add the physics body and the touch handler
     --
-    physics.addBody( enemy, "kinematic" )
+    physics.addBody( enemy, "dynamic" )
     --
     -- Since the touch handler is on an "object" and not the whole screen, 
     -- you don't need to remove it. When Composer hides the scene, it can't be
@@ -145,8 +160,8 @@ local function spawnEnemies()
     --
     E = levelData:getLevel(curLevel)
     for i, enemies in ipairs(E) do        
-        local tm = timer.performWithDelay( enemies.timerDelay , spawnEnemy, 1 )
-        tm.params = {xpos = enemies.xpos,  xpos = enemies.xpos, image = enemies.image }
+        timers[#timers + 1]  = timer.performWithDelay( enemies.timerDelay , spawnEnemy, 1 )
+        timers[#timers].params = {xpos = enemies.xpos,  xpos = enemies.xpos, image = enemies.image }
     end
 
 end
@@ -209,6 +224,14 @@ function scene:create( event )
     iLoose.x = display.contentCenterX + 100
     iLoose.y = display.contentHeight - 60
 
+    local pause = widget.newButton({
+        defaultFile = "images/pause.png",
+        onEvent = handlePause
+    })
+    sceneGroup:insert(pause)
+    pause.x = display.contentCenterX - 100
+    pause.y = display.contentHeight - 20
+
 end
 
 --
@@ -232,7 +255,7 @@ function scene:show( event )
     if event.phase == "did" then
         physics.start()
         transition.to( levelText, { time = 500, alpha = 0 } )
-        timer.performWithDelay( 500, spawnEnemies )
+        timers[#timers + 1] = timer.performWithDelay( 500, spawnEnemies )
 
     else -- event.phase == "will"
         -- The "will" phase happens before the scene transitions on screen.  This is a great
@@ -264,6 +287,9 @@ function scene:hide( event )
         -- Remove enterFrame listeners here
         -- stop timers, phsics, any audio playing
         --
+        for i = 1, #timers do
+            if timers[i] ~= nil then timer.cancel(timers[i]) end
+        end        
         physics.stop()
     end
 
