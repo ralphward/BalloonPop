@@ -14,4 +14,4 @@ M.settings.levels[1].topScore = 0
 -- levels data members:
 --      .stars -- Stars earned per level
 -- 		.energyBonus -- Bonus for unused energy
-return M
+return M 

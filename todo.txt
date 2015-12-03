@@ -2,11 +2,15 @@
 TODO::
 ~~~~~~~~~~~~~~
 
-Add particle effects for the balloon popping
+Make a better explosion
 
-add something to color at the back
+Explode another object
 
-Put particle effects on the object at the back
+Add a castle to defend at the bottom
+
+Add ability to win a level
+
+Add ability to loose a level
 
 Add some sound effects
 
@@ -14,15 +18,41 @@ Encrypt local storage
 
 Make an APK file
 
-Make Balloons explode
-
 Make a different type of enemy
 
 Complete level 1
 
 Add Stars for passing levels
 
-Clean up interface a bit
+Clean up interface a lot
+
+Add adds to the game
+
+~~~~~~~~~~~~~~
+GENERAL IDEAS::
+~~~~~~~~~~~~~~
+
+Castle defense game essentially - bad things fall - click to remove them
+- Too many get through it's game over
+- Get to the end of a level when everything is destroyed
+
+Ideas for objects
+- can be thrown at other objects
+- Do more damage than other objects
+- Objects that change color - should be clicked at a certain color
+- Objects that explode things close by
+- Big objects / small objects
+- Objects that shouldn't be clicked or they
+	- Spawn more enemies
+	- immediately attack castle
+	- in game stun so nothing can be clicked
+
+Different types of levels
+- Make it through a specified time frame - defend castle for one minute
+- Limited number of clicks with number of objects
+- Colored levels
+
+Have a way to build your castle defenses - earn currency from stars
 
 ~~~~~~~~~~~~~~
 DONE::
@@ -34,10 +64,15 @@ Create git branch
 
 Get level stepping working
 
-Create custome enemies for each level
+Create custom enemies for each level
 
 Add ability to go to main screen from level passed screen
 
 Create high scores for each level
 
 Save high scores for each level
+
+Add particle effects for the balloon popping
+
+Make Balloons explode
+

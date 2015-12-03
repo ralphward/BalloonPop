@@ -24,7 +24,7 @@ local vent = CBE.newVent({
     title = "explosion",
 
     positionType = "inRadius",
-    color = {{1, 1, 0}, {1, 0.5, 0}, {0.2, 0.2, 0.2}},
+    color = {{1, 0, 0}, {0.9, 0, 0}, {0.7, 0, 0}},
     particleProperties = {blendMode = "add"},
     emitX = display.contentCenterX,
     emitY = display.contentCenterY,
@@ -35,7 +35,7 @@ local vent = CBE.newVent({
 
     inTime = 100,
     lifeTime = 0,
-    outTime = 600,
+    outTime = 200,
 
     onCreation = function(particle)
         particle:changeColor({
@@ -51,10 +51,10 @@ local vent = CBE.newVent({
 
     physics = {
         velocity = 0,
-        gravityY = -0.035,
+        gravityY = 0,
         angles = {0, 360},
-        scaleRateX = 1.05,
-        scaleRateY = 1.05
+        scaleRateX = 1,
+        scaleRateY = 1
     }
 })
 
@@ -102,9 +102,8 @@ local function handleEnemyTouch( event )
         end
         event.target:removeSelf()
 
-
-        vent.emitX = math.random(display.contentCenterX - display.contentWidth * 0.25, display.contentCenterX + display.contentWidth * 0.25)
-        vent.emitY = math.random(display.contentCenterY - display.contentHeight * 0.25, display.contentCenterY + display.contentHeight * 0.25)
+        vent.emitX = event.x
+        vent.emitY = event.y
         vent:start()
         
         return true
@@ -121,16 +120,12 @@ local function spawnEnemy( event )
 
     -- generate a starting position on the screen, y will be off screen
     local params = event.source.params
-    local enemy = display.newCircle(params.xpos, -50, params.radius)
-    enemy:setFillColor( params.fillColor[1], params.fillColor[2], params.fillColor[3] )
-    -- 
-    -- must be inserted into the the group to be managed
-    --
+    local enemy = display.newImage(params.image, params.xpos, -50)
     sceneGroup:insert( enemy )
     --
     -- Add the physics body and the touch handler
     --
-    physics.addBody( enemy, "dynamic", { radius = params.radius } )
+    physics.addBody( enemy, "kinematic" )
     --
     -- Since the touch handler is on an "object" and not the whole screen, 
     -- you don't need to remove it. When Composer hides the scene, it can't be
@@ -138,8 +133,6 @@ local function spawnEnemy( event )
     -- when the scene is destroyed any display objects will be removed and that
     -- will remove this listener.
     enemy:addEventListener( "touch", handleEnemyTouch )
-
-    --
 
     -- Not needed in this implementation, but you may want to call spawnEnemy() to create one 
     -- and you might want to pass that enemy back to the caller.
@@ -153,7 +146,7 @@ local function spawnEnemies()
     E = levelData:getLevel(curLevel)
     for i, enemies in ipairs(E) do        
         local tm = timer.performWithDelay( enemies.timerDelay , spawnEnemy, 1 )
-        tm.params = {radius = enemies.radius, fillColor = enemies.fillColor, xpos = enemies.xpos }
+        tm.params = {xpos = enemies.xpos,  xpos = enemies.xpos, image = enemies.image }
     end
 
 end
@@ -173,64 +166,33 @@ function scene:create( event )
     -- Composer to manage for you.
     local sceneGroup = self.view
 
-    -- 
-    -- You need to start the physics engine to be able to add objects to it, but...
-    --
     physics.start()
-    --
-    -- because the scene is off screen being created, we don't want the simulation doing
-    -- anything yet, so pause it for now.
-    --
     physics.pause()
 
-    --
-    -- make a copy of the current level value out of our
-    -- non-Global app wide storage table.
-    --
     curLevel = myData.settings.currentLevel
 
     --
     -- create your objects here
     --
-    
-    --
-    -- These pieces of the app only need created.  We won't be accessing them any where else
-    -- so it's okay to make it "local" here
-    --
+
+    -- setup local background    
     local background = display.newRect(display.contentCenterX, display.contentCenterY, display.contentWidth, display.contentHeight)
     background:setFillColor( 0.6, 0.7, 0.3 )
-    --
-    -- Insert it into the scene to be managed by Composer
-    --
     sceneGroup:insert(background)
 
-    --
-    -- levelText is going to be accessed from the scene:show function. It cannot be local to
-    -- scene:create(). This is why it was declared at the top of the module so it can be seen 
-    -- everywhere in this module
     levelText = display.newText(curLevel, 0, 0, native.systemFontBold, 48 )
     levelText:setFillColor( 0 )
     levelText.x = display.contentCenterX
     levelText.y = display.contentCenterY
-    --
-    -- Insert it into the scene to be managed by Composer
-    --
     sceneGroup:insert( levelText )
 
-    -- 
-    -- because we want to access this in multiple functions, we need to forward declare the variable and
-    -- then create the object here in scene:create()
-    --
     currentScoreDisplay = display.newText("000000", display.contentWidth - 50, 10, native.systemFont, 16 )
     sceneGroup:insert( currentScoreDisplay )
 
     currentTopScore = display.newText("000000", display.contentWidth - 50, 30, native.systemFont, 16 )
     sceneGroup:insert( currentTopScore )
-    --
-    -- these two buttons exist as a quick way to let you test
-    -- going between scenes (as well as demo widget.newButton)
-    --
 
+    -- TODO:: Remove these buttons
     local iWin = widget.newButton({
         label = "I Win!",
         onEvent = handleWin
