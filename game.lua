@@ -36,6 +36,7 @@ local function removeEnemies()
     for i = 1, #enemies do
         if enemies[i] ~= nil then 
             enemies[i]:removeSelf() 
+            enemies[i] = nil
         end
     end        
     return true
@@ -74,6 +75,16 @@ local function handleEnemyTouch( event )
     end
 end
 
+local function destroyEnemy( event )
+    enemies[event.source.params.id]:removeSelf() 
+    enemies[event.source.params.id] = nil
+end
+
+local function moveEnemies( event )
+   local obj = event.source.objectID
+   obj:setLinearVelocity( 0, 0 )
+end
+
 local function spawnEnemy( event )
     local sceneGroup = scene.view  
 
@@ -81,12 +92,16 @@ local function spawnEnemy( event )
     local enemy = display.newImage(params.image, params.xpos, -50)
     enemy.id = params.id
     sceneGroup:insert( enemy )
-    physics.addBody( enemy, "dynamic" )
+    physics.addBody( enemy, "kinematic" )
+    enemy:setLinearVelocity( 0, 40 )
+
     enemy:addEventListener( "touch", handleEnemyTouch )
 
     enemies[enemy.id] = enemy
-end
 
+    timers[#timers + 1] = timer.performWithDelay( 10000, destroyEnemy )
+    timers[#timers].params = {id = enemy.id}
+end
 
 local function spawnEnemies()
 

@@ -4,6 +4,18 @@
 		"selected_items":
 		[
 			[
+				"time",
+				"timers"
+			],
+			[
+				"spawen",
+				"spawnEnemies"
+			],
+			[
+				"kill",
+				"killTimers"
+			],
+			[
 				"ph",
 				"physics"
 			],
@@ -59,7 +71,23 @@
 			"file": "game.lua",
 			"settings":
 			{
-				"buffer_size": 10907,
+				"buffer_size": 10314,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "vent.lua",
+			"settings":
+			{
+				"buffer_size": 953,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "main.lua",
+			"settings":
+			{
+				"buffer_size": 2808,
 				"line_ending": "Windows"
 			}
 		},
@@ -67,7 +95,7 @@
 			"file": "level_tips.lua",
 			"settings":
 			{
-				"buffer_size": 42,
+				"buffer_size": 66,
 				"line_ending": "Windows"
 			}
 		},
@@ -91,7 +119,7 @@
 			"file": "todo.txt",
 			"settings":
 			{
-				"buffer_size": 1739,
+				"buffer_size": 1852,
 				"line_ending": "Windows",
 				"name": "TODO::"
 			}
@@ -143,6 +171,8 @@
 	],
 	"file_history":
 	[
+		"/C/git/BalloonPop/vent",
+		"/C/Users/Shimara/AppData/Local/Temp/Temp1_BasicSpawn.zip/BasicSpawn/main.lua",
 		"/C/git/BalloonPop/mydata.lua",
 		"/C/git/BalloonPop/scene1.lua",
 		"/C/git/BalloonPop/menu.lua",
@@ -168,7 +198,7 @@
 	],
 	"find":
 	{
-		"height": 23.0
+		"height": 34.0
 	},
 	"find_in_files":
 	{
@@ -183,6 +213,11 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"params",
+			"spawnedObjects",
+			"timer",
+			"%06d",
+			"timers",
 			"spawnEnemy",
 			"handleLoss.",
 			"handleLoss",
@@ -231,7 +266,7 @@
 	"groups":
 	[
 		{
-			"selected": 4,
+			"selected": 6,
 			"sheets":
 			[
 				{
@@ -240,15 +275,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 10907,
+						"buffer_size": 10314,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								7915,
-								7915
+								2606,
+								2606
 							]
 						],
 						"settings":
@@ -258,85 +293,87 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 3604.0,
+						"translation.y": 887.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "vent.lua",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 953,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								31,
+								31
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Lua/Lua.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "main.lua",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2808,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								495,
+								495
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Lua/Lua.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 4,
 					"type": "text"
 				},
 				{
-					"buffer": 1,
+					"buffer": 3,
 					"file": "level_tips.lua",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 42,
+						"buffer_size": 66,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								42,
-								42
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Lua/Lua.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 2,
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "gamesettings.lua",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 3876,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								988,
-								988
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Lua/Lua.tmLanguage",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 1260.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "leveldata.lua",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 739,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								135,
-								135
+								66,
+								66
 							]
 						],
 						"settings":
@@ -352,19 +389,77 @@
 				},
 				{
 					"buffer": 4,
-					"file": "todo.txt",
+					"file": "gamesettings.lua",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1739,
+						"buffer_size": 3876,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								368,
-								368
+								3172,
+								3172
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Lua/Lua.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 803.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "leveldata.lua",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 739,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								124,
+								124
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Lua/Lua.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "todo.txt",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1852,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								130,
+								130
 							]
 						],
 						"settings":
@@ -373,7 +468,7 @@
 							"syntax": "Packages/Text/Plain text.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 180.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
