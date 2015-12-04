@@ -7,9 +7,6 @@ local utility = require( "utility" )
 local device = require( "device" )
 
 local params
-if device.isAndroid then
-    widget.setTheme( "widget_theme_android_holo_dark" )
-end
 
 -- Handle press events for the switches
 local function onSoundSwitchPress( event )

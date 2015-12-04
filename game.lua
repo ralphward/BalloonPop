@@ -8,6 +8,8 @@ local utility = require( "utility" )
 local physics = require( "physics" )
 local myData = require( "mydata" )
 local levelData = require( "leveldata" )
+local vent = require( "vent")
+local level_tips = require( "level_tips")
 
 -- 
 -- define local variables here
@@ -20,45 +22,93 @@ local currentTopScore       -- will be a display.newText() that draws the to sco
 local curLevel              -- will be used to hold the current level
 local isPaused = false
 local timers = {}           -- Variable used to hold local scene timers
+local enemies = {}          -- Variable used to hold enemies
 
-local vent = CBE.newVent({
-    preset = "fountain",
-    title = "explosion",
 
-    positionType = "inRadius",
-    color = {{1, 0, 0}, {0.9, 0, 0}, {0.7, 0, 0}},
-    particleProperties = {blendMode = "add"},
-    emitX = display.contentCenterX,
-    emitY = display.contentCenterY,
+local function killTimers()
+    for i = 1, #timers do
+        if timers[i] ~= nil then timer.cancel(timers[i]) end
+    end        
+    return true
+end
 
-    emissionNum = 5,
-    emitDelay = 5,
-    perEmit = 1,
+local function removeEnemies()
+    for i = 1, #enemies do
+        if enemies[i] ~= nil then 
+            enemies[i]:removeSelf() 
+        end
+    end        
+    return true
+end
+function resetScore()
 
-    inTime = 100,
-    lifeTime = 0,
-    outTime = 200,
+    currentScore = 0
+    currentScoreDisplay.text = string.format( "%06d", currentScore )
 
-    onCreation = function(particle)
-        particle:changeColor({
-            color = {0.1, 0.1, 0.1},
-            time = 600
-        })
-    end,
+    if myData.settings.levels[curLevel].topScore == nil then
+        currentTopScore.text = string.format( "%06d", currentScore )
+    else
+        currentTopScore.text = string.format( "%06d", myData.settings.levels[curLevel].topScore )
+        topScore = myData.settings.levels[curLevel].topScore
+    end
 
-    onUpdate = function(particle)
-        particle:setCBEProperty("scaleRateX", particle:getCBEProperty("scaleRateX") * 0.998)
-        particle:setCBEProperty("scaleRateY", particle:getCBEProperty("scaleRateY") * 0.998)
-    end,
+    return true 
+end
 
-    physics = {
-        velocity = 0,
-        gravityY = 0,
-        angles = {0, 360},
-        scaleRateX = 1,
-        scaleRateY = 1
-    }
-})
+local function handleEnemyTouch( event )
+    if event.phase == "began" then
+        currentScore = currentScore + 10
+        currentScoreDisplay.text = string.format( "%06d", currentScore )
+        if currentScore > topScore then
+            currentTopScore.text = string.format( "%06d", currentScore ) 
+            topScore = currentScore
+        end
+        enemies[event.target.id]:removeSelf()
+        enemies[event.target.id] = nil
+
+        vent.emitX = event.x
+        vent.emitY = event.y
+        vent:start()
+        
+        return true
+    end
+end
+
+local function spawnEnemy( event )
+    local sceneGroup = scene.view  
+
+    local params = event.source.params
+    local enemy = display.newImage(params.image, params.xpos, -50)
+    enemy.id = params.id
+    sceneGroup:insert( enemy )
+    physics.addBody( enemy, "dynamic" )
+    enemy:addEventListener( "touch", handleEnemyTouch )
+
+    enemies[enemy.id] = enemy
+end
+
+
+local function spawnEnemies()
+
+    E = levelData:getLevel(curLevel)
+    for i, enemies in ipairs(E) do        
+        timers[#timers + 1]  = timer.performWithDelay( enemies.timerDelay , spawnEnemy, 1 )
+        timers[#timers].params = {xpos = enemies.xpos,  xpos = enemies.xpos, image = enemies.image, id = i }
+    end
+
+end
+
+local function handleRestart( event )
+    if event.phase == "ended" then
+        physics.pause()
+        removeEnemies()
+        isPaused = true
+        killTimers()
+        resetScore()
+        spawnEnemies()
+        physics.start()
+    end
+end
 
 local function handlePause( event )
 
@@ -99,71 +149,6 @@ local function handleLoss( event )
         composer.gotoScene("gameover", { time= 500, effect = "crossFade" })
     end
     return true
-end
-
-local function handleEnemyTouch( event )
-    --
-    -- When you touch the enemy:
-    --    1. Increment the score
-    --    2. Update the onscreen text that shows the score
-    --    3. Kill the object touched
-    --    4. Check the high score and update if necessary
-    if event.phase == "began" then
-        currentScore = currentScore + 10
-        currentScoreDisplay.text = string.format( "%06d", currentScore )
-        if currentScore > topScore then
-            currentTopScore.text = string.format( "%06d", currentScore ) 
-            topScore = currentScore
-        end
-        event.target:removeSelf()
-
-        vent.emitX = event.x
-        vent.emitY = event.y
-        vent:start()
-        
-        return true
-    end
-
-
-end
-
-local function spawnEnemy( event )
-    -- make a local copy of the scene's display group.
-    -- since this function isn't a member of the scene object,
-    -- there is no "self" to use, so access it directly.
-    local sceneGroup = scene.view  
-
-    -- generate a starting position on the screen, y will be off screen
-    local params = event.source.params
-    local enemy = display.newImage(params.image, params.xpos, -50)
-    sceneGroup:insert( enemy )
-    --
-    -- Add the physics body and the touch handler
-    --
-    physics.addBody( enemy, "dynamic" )
-    --
-    -- Since the touch handler is on an "object" and not the whole screen, 
-    -- you don't need to remove it. When Composer hides the scene, it can't be
-    -- interacted with and doesn't need removed. 
-    -- when the scene is destroyed any display objects will be removed and that
-    -- will remove this listener.
-    enemy:addEventListener( "touch", handleEnemyTouch )
-
-    -- Not needed in this implementation, but you may want to call spawnEnemy() to create one 
-    -- and you might want to pass that enemy back to the caller.
-    return enemy
-end
-
-local function spawnEnemies()
-    --
-    -- Spawn a new enemy every second until canceled.
-    --
-    E = levelData:getLevel(curLevel)
-    for i, enemies in ipairs(E) do        
-        timers[#timers + 1]  = timer.performWithDelay( enemies.timerDelay , spawnEnemy, 1 )
-        timers[#timers].params = {xpos = enemies.xpos,  xpos = enemies.xpos, image = enemies.image }
-    end
-
 end
 
 --
@@ -232,6 +217,14 @@ function scene:create( event )
     pause.x = display.contentCenterX - 100
     pause.y = display.contentHeight - 20
 
+    local pause = widget.newButton({
+        defaultFile = "images/restart.png",
+        onEvent = handleRestart
+    })
+    sceneGroup:insert(pause)
+    pause.x = display.contentCenterX - 140
+    pause.y = display.contentHeight - 20
+
 end
 
 --
@@ -262,15 +255,7 @@ function scene:show( event )
         -- place to "reset" things that might be reset, i.e. move an object back to its starting
         -- position. Since the scene isn't on screen yet, your users won't see things "jump" to new
         -- locations. In this case, reset the score to 0.
-        currentScore = 0
-        currentScoreDisplay.text = string.format( "%06d", currentScore )
-
-        if myData.settings.levels[curLevel].topScore == nil then
-            currentTopScore.text = string.format( "%06d", currentScore )
-        else
-            currentTopScore.text = string.format( "%06d", myData.settings.levels[curLevel].topScore )
-            topScore = myData.settings.levels[curLevel].topScore
-        end
+        resetScore()
     end
 end
 
@@ -287,9 +272,7 @@ function scene:hide( event )
         -- Remove enterFrame listeners here
         -- stop timers, phsics, any audio playing
         --
-        for i = 1, #timers do
-            if timers[i] ~= nil then timer.cancel(timers[i]) end
-        end        
+        killTimers()
         physics.stop()
     end
 

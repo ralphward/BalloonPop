@@ -2,7 +2,11 @@
 TODO::
 ~~~~~~~~~~~~~~
 
-Add a restart button
+Add an overlay scene that can drop in over the top of the current - for pause / settings etc
+
+clean up game.lua
+
+Complete level 1
 
 Clean up interface a lot
  - Levels should display custom tips at the start
@@ -25,8 +29,6 @@ Encrypt local storage
 Make an APK file
 
 Make a different type of enemy
-
-Complete level 1
 
 Complete level 2,3,4,5
 
@@ -89,4 +91,6 @@ Add particle effects for the balloon popping
 Make Balloons explode
 
 Add a pause button
+
+Add a restart button
 
