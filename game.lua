@@ -1,16 +1,14 @@
 local composer = require( "composer" )
 local scene = composer.newScene()
-local CBE = require("CBE.CBE")
 
 local widget = require( "widget" )
 local json = require( "json" )
 local utility = require( "utility" )
 local physics = require( "physics" )
-local myData = require( "mydata" )
-local levelData = require( "leveldata" )
-local vent = require( "vent")
-local level_tips = require( "level_tips")
 
+local myData = require( "mydata" )
+local level_tips = require( "level_tips")
+local enemies = require("enemies")
 -- 
 -- define local variables here
 --
@@ -21,26 +19,8 @@ local topScore              -- will be used to store the best score for this lev
 local currentTopScore       -- will be a display.newText() that draws the to score on the screen
 local curLevel              -- will be used to hold the current level
 local isPaused = false
-local timers = {}           -- Variable used to hold local scene timers
-local enemies = {}          -- Variable used to hold enemies
+local gm_timer              -- used for lcal game timer to start the game
 
-
-local function killTimers()
-    for i = 1, #timers do
-        if timers[i] ~= nil then timer.cancel(timers[i]) end
-    end        
-    return true
-end
-
-local function removeEnemies()
-    for i = 1, #enemies do
-        if enemies[i] ~= nil then 
-            enemies[i]:removeSelf() 
-            enemies[i] = nil
-        end
-    end        
-    return true
-end
 function resetScore()
 
     currentScore = 0
@@ -56,71 +36,14 @@ function resetScore()
     return true 
 end
 
-local function handleEnemyTouch( event )
-    if event.phase == "began" then
-        currentScore = currentScore + 10
-        currentScoreDisplay.text = string.format( "%06d", currentScore )
-        if currentScore > topScore then
-            currentTopScore.text = string.format( "%06d", currentScore ) 
-            topScore = currentScore
-        end
-        enemies[event.target.id]:removeSelf()
-        enemies[event.target.id] = nil
-
-        vent.emitX = event.x
-        vent.emitY = event.y
-        vent:start()
-        
-        return true
-    end
-end
-
-local function destroyEnemy( event )
-    enemies[event.source.params.id]:removeSelf() 
-    enemies[event.source.params.id] = nil
-end
-
-local function moveEnemies( event )
-   local obj = event.source.objectID
-   obj:setLinearVelocity( 0, 0 )
-end
-
-local function spawnEnemy( event )
-    local sceneGroup = scene.view  
-
-    local params = event.source.params
-    local enemy = display.newImage(params.image, params.xpos, -50)
-    enemy.id = params.id
-    sceneGroup:insert( enemy )
-    physics.addBody( enemy, "kinematic" )
-    enemy:setLinearVelocity( 0, 40 )
-
-    enemy:addEventListener( "touch", handleEnemyTouch )
-
-    enemies[enemy.id] = enemy
-
-    timers[#timers + 1] = timer.performWithDelay( 10000, destroyEnemy )
-    timers[#timers].params = {id = enemy.id}
-end
-
-local function spawnEnemies()
-
-    E = levelData:getLevel(curLevel)
-    for i, enemies in ipairs(E) do        
-        timers[#timers + 1]  = timer.performWithDelay( enemies.timerDelay , spawnEnemy, 1 )
-        timers[#timers].params = {xpos = enemies.xpos,  xpos = enemies.xpos, image = enemies.image, id = i }
-    end
-
-end
-
 local function handleRestart( event )
     if event.phase == "ended" then
         physics.pause()
-        removeEnemies()
+        enemies.removeEnemies()
         isPaused = true
-        killTimers()
+        enemies.killTimers()
         resetScore()
-        spawnEnemies()
+        enemies.spawnEnemies()
         physics.start()
     end
 end
@@ -240,6 +163,7 @@ function scene:create( event )
     pause.x = display.contentCenterX - 140
     pause.y = display.contentHeight - 20
 
+
 end
 
 --
@@ -247,9 +171,6 @@ end
 -- afterwards as a result of calling composer.gotoScene()
 --
 function scene:show( event )
-    --
-    -- Make a local reference to the scene's view for scene:show()
-    --
     local sceneGroup = self.view
 
     --
@@ -263,7 +184,7 @@ function scene:show( event )
     if event.phase == "did" then
         physics.start()
         transition.to( levelText, { time = 500, alpha = 0 } )
-        timers[#timers + 1] = timer.performWithDelay( 500, spawnEnemies )
+        gm_timer = timer.performWithDelay( 500, enemies.spawnEnemies )
 
     else -- event.phase == "will"
         -- The "will" phase happens before the scene transitions on screen.  This is a great
@@ -287,7 +208,7 @@ function scene:hide( event )
         -- Remove enterFrame listeners here
         -- stop timers, phsics, any audio playing
         --
-        killTimers()
+        enemies.killTimers()
         physics.stop()
     end
 
