@@ -7,44 +7,45 @@ local utility = require( "utility" )
 local physics = require( "physics" )
 
 local myData = require( "mydata" )
+local gmData = require( "gamedata" )
 local level_tips = require( "level_tips")
 local enemies = require("enemies")
 -- 
 -- define local variables here
 --
-local currentScore          -- used to hold the numeric value of the current score
-local currentScoreDisplay   -- will be a display.newText() that draws the score on the screen
 local levelText             -- will be a display.newText() to let you know what level you're on
-local topScore              -- will be used to store the best score for this level
-local currentTopScore       -- will be a display.newText() that draws the to score on the screen
 local curLevel              -- will be used to hold the current level
 local isPaused = false
 local gm_timer              -- used for lcal game timer to start the game
 
+
 function resetScore()
 
-    currentScore = 0
-    currentScoreDisplay.text = string.format( "%06d", currentScore )
+    gmData.currentScore = 0
+    gmData.currentScoreDisplay.text = string.format( "%06d", gmData.currentScore )
 
     if myData.settings.levels[curLevel].topScore == nil then
-        currentTopScore.text = string.format( "%06d", currentScore )
+        gmData.currentTopScore.text = string.format( "%06d", gmData.currentScore )
     else
-        currentTopScore.text = string.format( "%06d", myData.settings.levels[curLevel].topScore )
-        topScore = myData.settings.levels[curLevel].topScore
+        gmData.currentTopScore.text = string.format( "%06d", myData.settings.levels[curLevel].topScore )
+        gmData.topScore = myData.settings.levels[curLevel].topScore
     end
 
     return true 
 end
 
 local function handleRestart( event )
-    if event.phase == "ended" then
+    if event.phase == "ended" and gmData.state == "playing" then
+        gmData.state = "restarting"
         physics.pause()
-        enemies.removeEnemies()
         isPaused = true
+        enemies.removeEnemies()
         enemies.killTimers()
         resetScore()
         enemies.spawnEnemies()
         physics.start()
+        isPaused = false
+        gmData.state = "playing"
     end
 end
 
@@ -69,7 +70,7 @@ end
 local function handleWin( event )
 
     if event.phase == "ended" then
-        myData.settings.levels[curLevel].topScore = topScore
+        myData.settings.levels[curLevel].topScore = gmData.topScore
         myData.settings.currentLevel = curLevel + 1
         if myData.settings.unlockedLevels < myData.settings.currentLevel then
             myData.settings.unlockedLevels = myData.settings.currentLevel
@@ -124,11 +125,11 @@ function scene:create( event )
     levelText.y = display.contentCenterY
     sceneGroup:insert( levelText )
 
-    currentScoreDisplay = display.newText("000000", display.contentWidth - 50, 10, native.systemFont, 16 )
-    sceneGroup:insert( currentScoreDisplay )
+    gmData.currentScoreDisplay = display.newText("000000", display.contentWidth - 50, 10, native.systemFont, 16 )
+    sceneGroup:insert( gmData.currentScoreDisplay )
 
-    currentTopScore = display.newText("000000", display.contentWidth - 50, 30, native.systemFont, 16 )
-    sceneGroup:insert( currentTopScore )
+    gmData.currentTopScore = display.newText("000000", display.contentWidth - 50, 30, native.systemFont, 16 )
+    sceneGroup:insert( gmData.currentTopScore )
 
     -- TODO:: Remove these buttons
     local iWin = widget.newButton({
