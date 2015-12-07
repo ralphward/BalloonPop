@@ -21,7 +21,7 @@ function M:removeEnemies()
     for i, l_enemy in ipairs(gmData.g_enemies) do    
         if l_enemy ~= nil then 
             l_enemy:removeSelf() 
-            l_enemy = nil
+            l_enemy = nil   
         end
     end        
     return true
@@ -36,8 +36,10 @@ local function handleEnemyTouch( event )
             gmData.currentTopScore.text = string.format( "%06d", gmData.currentScore ) 
             gmData.topScore = gmData.currentScore
         end
+
         gmData.g_enemies[event.target.id]:removeSelf()
         gmData.g_enemies[event.target.id] = nil
+        timer.cancel(gmData.timers[event.target.id])
 
         vent.emitX = event.x
         vent.emitY = event.y
@@ -48,7 +50,7 @@ local function handleEnemyTouch( event )
 end
 
 local function destroyEnemy( event )
-    gmData.g_enemies[event.source.params.id]:removeSelf() 
+    gmData.g_enemies[event.source.params.id]:removeSelf()
     gmData.g_enemies[event.source.params.id] = nil
 end
 
@@ -72,8 +74,7 @@ local function spawnEnemy( event )
 
     gmData.g_enemies[enemy.id] = enemy
 
-    gmData.timers[#gmData.timers + 1] = timer.performWithDelay( 10000, destroyEnemy )
-    gmData.timers[#gmData.timers].params = {id = enemy.id}
+    gmData.timers[enemy.id] = timer.performWithDelay( 10000, destroyEnemy )
 end
 
 function M:spawnEnemies()
@@ -82,7 +83,7 @@ function M:spawnEnemies()
     E = levelData:getLevel(curLevel)
     for i, enemy in ipairs(E) do        
         gmData.timers[numTimers]  = timer.performWithDelay( enemy.timerDelay , spawnEnemy, 1 )
-        gmData.timers[numTimers].params = { xpos = enemy.xpos, image = enemy.image, id = i }
+        gmData.timers[numTimers].params = { xpos = enemy.xpos, image = enemy.image, id = enemy.id }
         numTimers = numTimers + 1
     end
 

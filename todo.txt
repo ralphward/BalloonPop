@@ -2,8 +2,6 @@
 TODO::
 ~~~~~~~~~~~~~~
 
-enemies not removing correctly when restarting level - check timers remove properly
-
 Add an overlay scene that can drop in over the top of the current - for pause / settings etc
 
 Complete level 1
@@ -40,7 +38,9 @@ adds for the game
 BUGSS::
 ~~~~~~~~~~~~~~
 
-None known at this point
+enemies not removing correctly when restarting level - check timers remove properly
+
+timers to destroy enemies are not pausing when the level is paused
 
 ~~~~~~~~~~~~~~
 GENERAL IDEAS::
