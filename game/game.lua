@@ -3,13 +3,14 @@ local scene = composer.newScene()
 
 local widget = require( "widget" )
 local json = require( "json" )
-local utility = require( "utility" )
 local physics = require( "physics" )
 
-local myData = require( "mydata" )
-local gmData = require( "gamedata" )
-local level_tips = require( "level_tips")
-local enemies = require("enemies")
+local utility = require( "config.utility" )
+local myData = require( "config.mydata" )
+
+local gmData = require( "game.gamedata" )
+local level_tips = require( "game.level_tips")
+local enemies = require("game.enemies")
 -- 
 -- define local variables here
 --
@@ -82,16 +83,16 @@ local function handleWin( event )
             myData.settings.unlockedLevels = myData.settings.currentLevel
         end
         utility.saveTable(myData.settings, "settings.json")
-        composer.removeScene("nextlevel")
-        composer.gotoScene("nextlevel", { time= 500, effect = "crossFade" })
+        composer.removeScene("game.nextlevel")
+        composer.gotoScene("game.nextlevel", { time= 500, effect = "crossFade" })
     end
     return true
 end
 
 local function handleLoss( event )
     if event.phase == "ended" then
-        composer.removeScene("gameover")
-        composer.gotoScene("gameover", { time= 500, effect = "crossFade" })
+        composer.removeScene("game.gameover")
+        composer.gotoScene("game.gameover", { time= 500, effect = "crossFade" })
     end
     return true
 end

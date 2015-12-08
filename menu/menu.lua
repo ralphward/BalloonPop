@@ -2,38 +2,37 @@ local composer = require( "composer" )
 local scene = composer.newScene()
 
 local widget = require( "widget" )
-local utility = require( "utility" )
+local utility = require( "config.utility" )
 local ads = require( "ads" )
 
 local params
 
-local myData = require( "mydata" )
+local myData = require( "config.mydata" )
 
 local function handlePlayButtonEvent( event )
     if ( "ended" == event.phase ) then
-        composer.removeScene( "levelselect", false )
-        composer.gotoScene("levelselect", { effect = "fromTop", time = 333 })
+        composer.removeScene( "menu.levelselect", false )
+        composer.gotoScene("menu.levelselect", { effect = "fromTop", time = 333 })
     end
 end
 
 local function handleHelpButtonEvent( event )
     if ( "ended" == event.phase ) then
-        --composer.gotoScene("help", { effect = "fromTop", time = 333, isModal = true })
-        composer.showOverlay("help", { effect = "fromTop", time = 333, isModal = true })
+        composer.showOverlay("menu.help", { effect = "fromTop", time = 333, isModal = true })
     end
 end
 
 local function handleCreditsButtonEvent( event )
 
     if ( "ended" == event.phase ) then
-        composer.showOverlay("gamecredits", { effect = "fromTop", time = 333, isModal = true })
+        composer.showOverlay("menu.gamecredits", { effect = "fromTop", time = 333, isModal = true })
     end
 end
 
 local function handleSettingsButtonEvent( event )
 
     if ( "ended" == event.phase ) then
-        composer.showOverlay("gamesettings", { effect = "fromTop", time = 333, isModal = true })
+        composer.showOverlay("menu.gamesettings", { effect = "fromTop", time = 333, isModal = true })
     end
 end
 

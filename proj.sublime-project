@@ -3,6 +3,15 @@
 	[
 		{
 			"path": "."
+		},
+		{
+			"path": "game"
+		},
+		{
+			"path": "menu"
+		},
+		{
+			"path": "config"
 		}
 	]
 }

@@ -1,11 +1,11 @@
 local M = {}
 local composer = require( "composer" )
 
-local myData = require( "mydata" )
-local gmData = require( "gamedata" )
-local levelData = require( "leveldata" )
+local myData = require( "config.mydata" )
+local gmData = require( "game.gamedata" )
+local levelData = require( "game.leveldata" )
 local CBE = require("CBE.CBE")
-local vent = require( "vent")
+local vent = require( "game.vent")
 
 local curLevel = myData.settings.currentLevel
 
@@ -65,7 +65,7 @@ local function moveEnemies( event )
 end
 
 local function spawnEnemy( event )
-    local scene = composer.getScene("game")
+    local scene = composer.getScene("game.game")
     local sceneGroup = scene.view  
 
     local params = event.source.params

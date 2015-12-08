@@ -2,9 +2,9 @@ local composer = require( "composer" )
 local scene = composer.newScene()
 
 local widget = require( "widget" )
-local myData = require( "mydata" )
-local utility = require( "utility" ) 
-local device = require( "device" )
+local myData = require( "config.mydata" )
+local utility = require( "config.utility" ) 
+local device = require( "config.device" )
 
 local params
 

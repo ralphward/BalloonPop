@@ -2,7 +2,7 @@ local composer = require( "composer" )
 local scene = composer.newScene()
 
 local widget = require( "widget" )
-local utility = require( "utility" ) 
+local utility = require( "config.utility" ) 
 
 local params
 

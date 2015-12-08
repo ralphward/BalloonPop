@@ -2,8 +2,8 @@ local composer = require( "composer" )
 local scene = composer.newScene()
 
 local widget = require( "widget" )
-local myData = require( "mydata" )
-local utility = require( "utility" )
+local myData = require( "config.mydata" )
+local utility = require( "config.utility" )
  
 local nextLevelText
 local params
@@ -12,8 +12,8 @@ local params
 local function handleButtonEvent( event )
 
     if ( "ended" == event.phase ) then
-        composer.removeScene( "game", false )
-        composer.gotoScene( "game", { effect = "crossFade", time = 333 } )
+        composer.removeScene( "game.game", false )
+        composer.gotoScene( "game.game", { effect = "crossFade", time = 333 } )
     end
 end
 
@@ -27,7 +27,7 @@ local function returnToMenu( event )
                 someOtherKey = 10
             }
         }
-        composer.gotoScene( "menu", options )
+        composer.gotoScene( "menu.menu", options )
     end
     return true
 end

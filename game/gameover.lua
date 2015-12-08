@@ -3,10 +3,11 @@ local scene = composer.newScene()
 
 local widget = require( "widget" )
 local json = require( "json" )
-local utility = require( "utility" )
-local myData = require( "mydata" )
 local gameNetwork = require( "gameNetwork" )
-local device = require( "device" )
+
+local utility = require( "config.utility" )
+local myData = require( "config.mydata" )
+local device = require( "config.device" )
 
 local params
 local newHighScore = false
@@ -22,7 +23,7 @@ local function handleButtonEvent( event )
                 someOtherKey = 10
             }
         }
-        composer.gotoScene( "menu", options )
+        composer.gotoScene( "menu.menu", options )
     end
     return true
 end
