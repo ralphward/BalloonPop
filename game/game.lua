@@ -1,112 +1,52 @@
 local composer = require( "composer" )
 local scene = composer.newScene()
-local CBE = require("CBE.CBE")
 
 local widget = require( "widget" )
 local json = require( "json" )
-local utility = require( "utility" )
 local physics = require( "physics" )
-local myData = require( "mydata" )
-local levelData = require( "leveldata" )
-local vent = require( "vent")
-local level_tips = require( "level_tips")
 
+local utility = require( "config.utility" )
+local myData = require( "config.mydata" )
+
+local gmData = require( "game.gamedata" )
+local level_tips = require( "game.level_tips")
+local enemies = require("game.enemies")
 -- 
 -- define local variables here
 --
-local currentScore          -- used to hold the numeric value of the current score
-local currentScoreDisplay   -- will be a display.newText() that draws the score on the screen
 local levelText             -- will be a display.newText() to let you know what level you're on
-local topScore              -- will be used to store the best score for this level
-local currentTopScore       -- will be a display.newText() that draws the to score on the screen
 local curLevel              -- will be used to hold the current level
 local isPaused = false
-local timers = {}           -- Variable used to hold local scene timers
-local enemies = {}          -- Variable used to hold enemies
+local gm_timer              -- used for local game timer to start the game
 
 
-local function killTimers()
-    for i = 1, #timers do
-        if timers[i] ~= nil then timer.cancel(timers[i]) end
-    end        
-    return true
-end
-
-local function removeEnemies()
-    for i = 1, #enemies do
-        if enemies[i] ~= nil then 
-            enemies[i]:removeSelf() 
-        end
-    end        
-    return true
-end
 function resetScore()
 
-    currentScore = 0
-    currentScoreDisplay.text = string.format( "%06d", currentScore )
+    gmData.currentScore = 0
+    gmData.currentScoreDisplay.text = string.format( "%06d", gmData.currentScore )
 
     if myData.settings.levels[curLevel].topScore == nil then
-        currentTopScore.text = string.format( "%06d", currentScore )
+        gmData.currentTopScore.text = string.format( "%06d", gmData.currentScore )
     else
-        currentTopScore.text = string.format( "%06d", myData.settings.levels[curLevel].topScore )
-        topScore = myData.settings.levels[curLevel].topScore
+        gmData.currentTopScore.text = string.format( "%06d", myData.settings.levels[curLevel].topScore )
+        gmData.topScore = myData.settings.levels[curLevel].topScore
     end
 
     return true 
 end
 
-local function handleEnemyTouch( event )
-    if event.phase == "began" then
-        currentScore = currentScore + 10
-        currentScoreDisplay.text = string.format( "%06d", currentScore )
-        if currentScore > topScore then
-            currentTopScore.text = string.format( "%06d", currentScore ) 
-            topScore = currentScore
-        end
-        enemies[event.target.id]:removeSelf()
-        enemies[event.target.id] = nil
-
-        vent.emitX = event.x
-        vent.emitY = event.y
-        vent:start()
-        
-        return true
-    end
-end
-
-local function spawnEnemy( event )
-    local sceneGroup = scene.view  
-
-    local params = event.source.params
-    local enemy = display.newImage(params.image, params.xpos, -50)
-    enemy.id = params.id
-    sceneGroup:insert( enemy )
-    physics.addBody( enemy, "dynamic" )
-    enemy:addEventListener( "touch", handleEnemyTouch )
-
-    enemies[enemy.id] = enemy
-end
-
-
-local function spawnEnemies()
-
-    E = levelData:getLevel(curLevel)
-    for i, enemies in ipairs(E) do        
-        timers[#timers + 1]  = timer.performWithDelay( enemies.timerDelay , spawnEnemy, 1 )
-        timers[#timers].params = {xpos = enemies.xpos,  xpos = enemies.xpos, image = enemies.image, id = i }
-    end
-
-end
-
 local function handleRestart( event )
-    if event.phase == "ended" then
+    if event.phase == "ended" and gmData.state == "playing" then
+        gmData.state = "restarting"
         physics.pause()
-        removeEnemies()
         isPaused = true
-        killTimers()
+        enemies.killTimers()
+        enemies.removeEnemies()
         resetScore()
-        spawnEnemies()
+        enemies.spawnEnemies()
         physics.start()
+        isPaused = false
+        gmData.state = "playing"
     end
 end
 
@@ -115,9 +55,15 @@ local function handlePause( event )
     if event.phase == "ended" then
         if isPaused == false then
             physics.pause()
+            for i, l_timer in pairs(gmData.timers) do    
+                if l_timer ~= nil then timer.pause(l_timer) end
+            end            
             isPaused = true
         elseif isPaused == true then
             physics.start()
+            for i, l_timer in pairs(gmData.timers) do    
+                if l_timer ~= nil then timer.resume(l_timer) end
+            end            
             isPaused = false
         end
     end
@@ -131,22 +77,22 @@ end
 local function handleWin( event )
 
     if event.phase == "ended" then
-        myData.settings.levels[curLevel].topScore = topScore
+        myData.settings.levels[curLevel].topScore = gmData.topScore
         myData.settings.currentLevel = curLevel + 1
         if myData.settings.unlockedLevels < myData.settings.currentLevel then
             myData.settings.unlockedLevels = myData.settings.currentLevel
         end
         utility.saveTable(myData.settings, "settings.json")
-        composer.removeScene("nextlevel")
-        composer.gotoScene("nextlevel", { time= 500, effect = "crossFade" })
+        composer.removeScene("game.nextlevel")
+        composer.gotoScene("game.nextlevel", { time= 500, effect = "crossFade" })
     end
     return true
 end
 
 local function handleLoss( event )
     if event.phase == "ended" then
-        composer.removeScene("gameover")
-        composer.gotoScene("gameover", { time= 500, effect = "crossFade" })
+        composer.removeScene("game.gameover")
+        composer.gotoScene("game.gameover", { time= 500, effect = "crossFade" })
     end
     return true
 end
@@ -186,11 +132,11 @@ function scene:create( event )
     levelText.y = display.contentCenterY
     sceneGroup:insert( levelText )
 
-    currentScoreDisplay = display.newText("000000", display.contentWidth - 50, 10, native.systemFont, 16 )
-    sceneGroup:insert( currentScoreDisplay )
+    gmData.currentScoreDisplay = display.newText("000000", display.contentWidth - 50, 10, native.systemFont, 16 )
+    sceneGroup:insert( gmData.currentScoreDisplay )
 
-    currentTopScore = display.newText("000000", display.contentWidth - 50, 30, native.systemFont, 16 )
-    sceneGroup:insert( currentTopScore )
+    gmData.currentTopScore = display.newText("000000", display.contentWidth - 50, 30, native.systemFont, 16 )
+    sceneGroup:insert( gmData.currentTopScore )
 
     -- TODO:: Remove these buttons
     local iWin = widget.newButton({
@@ -225,6 +171,7 @@ function scene:create( event )
     pause.x = display.contentCenterX - 140
     pause.y = display.contentHeight - 20
 
+
 end
 
 --
@@ -232,9 +179,6 @@ end
 -- afterwards as a result of calling composer.gotoScene()
 --
 function scene:show( event )
-    --
-    -- Make a local reference to the scene's view for scene:show()
-    --
     local sceneGroup = self.view
 
     --
@@ -248,7 +192,7 @@ function scene:show( event )
     if event.phase == "did" then
         physics.start()
         transition.to( levelText, { time = 500, alpha = 0 } )
-        timers[#timers + 1] = timer.performWithDelay( 500, spawnEnemies )
+        gm_timer = timer.performWithDelay( 500, enemies.spawnEnemies )
 
     else -- event.phase == "will"
         -- The "will" phase happens before the scene transitions on screen.  This is a great
@@ -272,7 +216,7 @@ function scene:hide( event )
         -- Remove enterFrame listeners here
         -- stop timers, phsics, any audio playing
         --
-        killTimers()
+        enemies.killTimers()
         physics.stop()
     end
 

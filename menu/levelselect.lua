@@ -2,16 +2,16 @@ local composer = require( "composer" )
 local scene = composer.newScene()
 
 local widget = require( "widget" )
-local utility = require( "utility" )
-local myData = require( "mydata" )
+local utility = require( "config.utility" )
+local myData = require( "config.mydata" )
 
 local params
 
 local function handleButtonEvent( event )
 
     if ( "ended" == event.phase ) then
-        composer.removeScene( "menu", false )
-        composer.gotoScene( "menu", { effect = "crossFade", time = 333 } )
+        composer.removeScene( "menu.menu", false )
+        composer.gotoScene( "menu.menu", { effect = "slideUp", time = 333 } )
     end
 end
 
@@ -20,8 +20,8 @@ local function handleLevelSelect( event )
     if ( "ended" == event.phase ) then
         -- set the current level to the ID of the selected level
         myData.settings.currentLevel = event.target.id
-        composer.removeScene( "game", false )
-        composer.gotoScene( "game", { effect = "crossFade", time = 333 } )
+        composer.removeScene( "game.game", false )
+        composer.gotoScene( "game.game", { effect = "crossFade", time = 333 } )
     end
 end
 --

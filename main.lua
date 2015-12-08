@@ -3,9 +3,9 @@ local widget = require( "widget" )
 local ads = require( "ads" )
 local store = require( "store" )
 local gameNetwork = require("gameNetwork")
-local utility = require( "utility" )
-local myData = require( "mydata" )
-local device = require( "device" )
+local utility = require( "config.utility" )
+local myData = require( "config.mydata" )
+local device = require( "config.device" )
 
 display.setStatusBar( display.HiddenStatusBar )
 
@@ -81,10 +81,10 @@ local function onKeyEvent( event )
     print( event.phase, event.keyName )
 
     if ( "back" == keyName and phase == "up" ) then
-        if ( composer.getCurrentSceneName() == "menu" ) then
+        if ( composer.getCurrentSceneName() == "menu.menu" ) then
             native.requestExit()
         else
-            composer.gotoScene( "menu", { effect="crossFade", time=500 } )
+            composer.gotoScene( "menu.menu", { effect="slideUp", time=500 } )
         end
         return true
     end
@@ -116,7 +116,7 @@ local function systemEvents(event)
         --
         -- Go to the menu
         --
-        composer.gotoScene( "menu", { time = 250, effect = "fade" } )
+        composer.gotoScene( "menu.menu", { time = 250, effect = "fade" } )
     end
     return true
 end
