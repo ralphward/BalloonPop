@@ -11,19 +11,24 @@ local curLevel = myData.settings.currentLevel
 
 function M:killTimers()
 
-    for i, l_timer in ipairs(gmData.timers) do    
+    for i, l_timer in pairs(gmData.timers) do    
         if l_timer ~= nil then timer.cancel(l_timer) end
-    end        
+    end
+
     return true
 end
 
 function M:removeEnemies()
-    for i, l_enemy in ipairs(gmData.g_enemies) do    
-        if l_enemy ~= nil then 
+    for i, l_enemy in pairs(gmData.g_enemies) do    
+        -- this test is to avoid race time conditions where user may press restart level very quickly
+        if (l_enemy.removeSelf) ~= nil then 
             l_enemy:removeSelf() 
-            l_enemy = nil   
+        end
+        if l_enemy ~= nil then 
+            l_enemy = nil
         end
     end        
+
     return true
 end
 
@@ -73,18 +78,16 @@ local function spawnEnemy( event )
     enemy:addEventListener( "touch", handleEnemyTouch )
 
     gmData.g_enemies[enemy.id] = enemy
-
     gmData.timers[enemy.id] = timer.performWithDelay( 10000, destroyEnemy )
+    gmData.timers[enemy.id].params = { id = enemy.id }
 end
 
 function M:spawnEnemies()
 
-    local numTimers = 1
     E = levelData:getLevel(curLevel)
     for i, enemy in ipairs(E) do        
-        gmData.timers[numTimers]  = timer.performWithDelay( enemy.timerDelay , spawnEnemy, 1 )
-        gmData.timers[numTimers].params = { xpos = enemy.xpos, image = enemy.image, id = enemy.id }
-        numTimers = numTimers + 1
+        gmData.timers["z"..enemy.id]  = timer.performWithDelay( enemy.timerDelay , spawnEnemy, 1 )
+        gmData.timers["z"..enemy.id].params = { xpos = enemy.xpos, image = enemy.image, id = enemy.id }
     end
 
 end

@@ -11,7 +11,7 @@ local function handleButtonEvent( event )
 
     if ( "ended" == event.phase ) then
         composer.removeScene( "menu", false )
-        composer.gotoScene( "menu", { effect = "crossFade", time = 333 } )
+        composer.gotoScene( "menu", { effect = "slideUp", time = 333 } )
     end
 end
 

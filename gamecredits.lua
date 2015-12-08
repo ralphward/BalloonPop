@@ -9,7 +9,7 @@ local params
 local function handleButtonEvent( event )
 
     if ( "ended" == event.phase ) then
-        composer.gotoScene("menu", { effect = "crossFade", time = 333 })
+        composer.hideOverlay( "slideUp", 333  )
     end
 end
 
@@ -25,7 +25,8 @@ function scene:create( event )
     -- setup a page background, really not that important though composer
     -- crashes out if there isn't a display object in the view.
     --
-    local background = display.newRect( 0, 0, 570, 360)
+    local background = display.newRect( 0, 0, 400, 360)
+    background:setFillColor( 0.5 )        
     background.x = display.contentCenterX
     background.y = display.contentCenterY
     sceneGroup:insert(background)

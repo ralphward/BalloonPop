@@ -84,7 +84,7 @@ local function onKeyEvent( event )
         if ( composer.getCurrentSceneName() == "menu" ) then
             native.requestExit()
         else
-            composer.gotoScene( "menu", { effect="crossFade", time=500 } )
+            composer.gotoScene( "menu", { effect="slideUp", time=500 } )
         end
         return true
     end

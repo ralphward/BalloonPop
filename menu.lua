@@ -12,27 +12,28 @@ local myData = require( "mydata" )
 local function handlePlayButtonEvent( event )
     if ( "ended" == event.phase ) then
         composer.removeScene( "levelselect", false )
-        composer.gotoScene("levelselect", { effect = "crossFade", time = 333 })
+        composer.gotoScene("levelselect", { effect = "fromTop", time = 333 })
     end
 end
 
 local function handleHelpButtonEvent( event )
     if ( "ended" == event.phase ) then
-        composer.gotoScene("help", { effect = "crossFade", time = 333, isModal = true })
+        --composer.gotoScene("help", { effect = "fromTop", time = 333, isModal = true })
+        composer.showOverlay("help", { effect = "fromTop", time = 333, isModal = true })
     end
 end
 
 local function handleCreditsButtonEvent( event )
 
     if ( "ended" == event.phase ) then
-        composer.gotoScene("gamecredits", { effect = "crossFade", time = 333 })
+        composer.showOverlay("gamecredits", { effect = "fromTop", time = 333, isModal = true })
     end
 end
 
 local function handleSettingsButtonEvent( event )
 
     if ( "ended" == event.phase ) then
-        composer.gotoScene("gamesettings", { effect = "crossFade", time = 333 })
+        composer.showOverlay("gamesettings", { effect = "fromTop", time = 333, isModal = true })
     end
 end
 

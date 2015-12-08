@@ -16,7 +16,7 @@ local enemies = require("enemies")
 local levelText             -- will be a display.newText() to let you know what level you're on
 local curLevel              -- will be used to hold the current level
 local isPaused = false
-local gm_timer              -- used for lcal game timer to start the game
+local gm_timer              -- used for local game timer to start the game
 
 
 function resetScore()
@@ -39,8 +39,8 @@ local function handleRestart( event )
         gmData.state = "restarting"
         physics.pause()
         isPaused = true
-        enemies.removeEnemies()
         enemies.killTimers()
+        enemies.removeEnemies()
         resetScore()
         enemies.spawnEnemies()
         physics.start()
@@ -54,9 +54,15 @@ local function handlePause( event )
     if event.phase == "ended" then
         if isPaused == false then
             physics.pause()
+            for i, l_timer in pairs(gmData.timers) do    
+                if l_timer ~= nil then timer.pause(l_timer) end
+            end            
             isPaused = true
         elseif isPaused == true then
             physics.start()
+            for i, l_timer in pairs(gmData.timers) do    
+                if l_timer ~= nil then timer.resume(l_timer) end
+            end            
             isPaused = false
         end
     end
