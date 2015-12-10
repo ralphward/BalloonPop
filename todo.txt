@@ -2,8 +2,6 @@
 TODO::
 ~~~~~~~~~~~~~~
 
-Add an overlay scene that can drop in over the top of the current - for pause / settings etc
-
 Complete level 1
 
 Clean up interface a lot
@@ -94,6 +92,8 @@ clean up game.lua
 
 clean up folder structure
 
+Add an overlay scene that can drop in over the top of the current - for pause / settings etc
+
 ~~~~~~~~~~~~~~
 RESOLVED BUGSS::
 ~~~~~~~~~~~~~~
@@ -103,4 +103,6 @@ enemies not removing correctly when restarting level - check timers remove prope
 when hitting restart many times causes removeSelf timing bug for enemy table
 
 timers to destroy enemies are not pausing when the level is paused
+
+enemies still being destroyed while game is paused
 

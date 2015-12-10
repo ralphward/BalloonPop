@@ -33,7 +33,7 @@ function M:removeEnemies()
 end
 
 local function handleEnemyTouch( event )
-    if event.phase == "began" then
+    if event.phase == "began" and gmData.state == "playing" then
 
         gmData.currentScore = gmData.currentScore + 10
         gmData.currentScoreDisplay.text = string.format( "%06d", gmData.currentScore )

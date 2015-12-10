@@ -16,7 +16,6 @@ local enemies = require("game.enemies")
 --
 local levelText             -- will be a display.newText() to let you know what level you're on
 local curLevel              -- will be used to hold the current level
-local isPaused = false
 local gm_timer              -- used for local game timer to start the game
 
 
@@ -39,33 +38,26 @@ local function handleRestart( event )
     if event.phase == "ended" and gmData.state == "playing" then
         gmData.state = "restarting"
         physics.pause()
-        isPaused = true
         enemies.killTimers()
         enemies.removeEnemies()
         resetScore()
         enemies.spawnEnemies()
         physics.start()
-        isPaused = false
         gmData.state = "playing"
     end
 end
 
 local function handlePause( event )
 
-    if event.phase == "ended" then
-        if isPaused == false then
-            physics.pause()
-            for i, l_timer in pairs(gmData.timers) do    
-                if l_timer ~= nil then timer.pause(l_timer) end
-            end            
-            isPaused = true
-        elseif isPaused == true then
-            physics.start()
-            for i, l_timer in pairs(gmData.timers) do    
-                if l_timer ~= nil then timer.resume(l_timer) end
-            end            
-            isPaused = false
-        end
+    if event.phase == "ended" and gmData.state == "playing" then
+        physics.pause()
+        for i, l_timer in pairs(gmData.timers) do    
+            if l_timer ~= nil then timer.pause(l_timer) end
+        end            
+        isPaused = true
+        gmData.state = "paused"
+
+        composer.showOverlay("game.pause", { effect = "fromTop", time = 333, isModal = true })
     end
 
     return true
@@ -193,6 +185,7 @@ function scene:show( event )
         physics.start()
         transition.to( levelText, { time = 500, alpha = 0 } )
         gm_timer = timer.performWithDelay( 500, enemies.spawnEnemies )
+        gmData.state = "playing"
 
     else -- event.phase == "will"
         -- The "will" phase happens before the scene transitions on screen.  This is a great
@@ -235,6 +228,15 @@ function scene:destroy( event )
     
 end
 
+function scene:resumeGame()
+    --code to resume game
+    physics.start()
+    for i, l_timer in pairs(gmData.timers) do    
+        if l_timer ~= nil then timer.resume(l_timer) end
+    end            
+    gmData.state = "playing"
+
+end
 ---------------------------------------------------------------------------------
 -- END OF YOUR IMPLEMENTATION
 ---------------------------------------------------------------------------------
