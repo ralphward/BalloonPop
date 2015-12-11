@@ -2,6 +2,10 @@
 TODO::
 ~~~~~~~~~~~~~~
 
+Have balloons explode on contact
+
+Better firing ability - touch screen is frustrating
+
 Complete level 1
 
 Clean up interface a lot
@@ -35,6 +39,8 @@ adds for the game
 ~~~~~~~~~~~~~~
 BUGSS::
 ~~~~~~~~~~~~~~
+
+If level is finished with projectile path on screen it fails on reload
 
 ~~~~~~~~~~~~~~
 GENERAL IDEAS::
@@ -106,3 +112,4 @@ timers to destroy enemies are not pausing when the level is paused
 
 enemies still being destroyed while game is paused
 
+Add projectile to main game

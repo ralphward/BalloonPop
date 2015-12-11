@@ -7,5 +7,6 @@ M.topScore = 0              -- will be used to store the best score for this lev
 M.timers = {}
 M.g_enemies = {}
 M.state = "playing"
+M.fireState = 0
 
 return M
