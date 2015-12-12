@@ -33,7 +33,7 @@ function M:removeEnemies()
 end
 
 local function handleEnemyTouch( event )
-    if event.phase == "began" and gmData.state == "playing" then
+    if gmData.state == "playing" then
 
         gmData.currentScore = gmData.currentScore + 10
         gmData.currentScoreDisplay.text = string.format( "%06d", gmData.currentScore )
@@ -71,7 +71,7 @@ local function spawnEnemy( event )
     enemy.gravityScale = 0
     enemy:setLinearVelocity( 0, 40 )
 
-    enemy:addEventListener( "touch", handleEnemyTouch )
+    enemy:addEventListener( "preCollision", handleEnemyTouch )
 
     gmData.g_enemies[enemy.id] = enemy
     gmData.timers[enemy.id] = timer.performWithDelay( 10000, destroyEnemy )

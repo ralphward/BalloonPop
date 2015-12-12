@@ -124,7 +124,7 @@ local function updatePrediction( event )
     local startingVelocity = { x=event.x-xStartPos, y=event.y-yStartPos }
     
     print ("X: " .. startingVelocity.x .. " Y: " .. startingVelocity.y)
-    for i = 1,180 do --for (int i = 0; i < 180; i++)
+    for i = 1,180 do 
         local s = { x=xStartPos, y=yStartPos }
         local trajectoryPosition = getTrajectoryPoint( s, startingVelocity, i ) -- b2Vec2 trajectoryPosition = getTrajectoryPoint( startingPosition, startingVelocity, i )
         local circ = display.newCircle( prediction, trajectoryPosition.x, trajectoryPosition.y, 5 )
