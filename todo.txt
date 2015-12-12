@@ -2,7 +2,9 @@
 TODO::
 ~~~~~~~~~~~~~~
 
-Add an overlay scene that can drop in over the top of the current - for pause / settings etc
+Update General ideas to more current idea
+
+Better firing ability - touch screen is frustrating
 
 Complete level 1
 
@@ -37,6 +39,22 @@ adds for the game
 ~~~~~~~~~~~~~~
 BUGSS::
 ~~~~~~~~~~~~~~
+
+projectile path is not removed from scene when required - need a collection to hold the objects
+
+Balloons explode is in the wrong spot
+
+~~~~~~~~~~~~~~
+RESOLVED BUGSS::
+~~~~~~~~~~~~~~
+
+enemies not removing correctly when restarting level - check timers remove properly
+
+when hitting restart many times causes removeSelf timing bug for enemy table
+
+timers to destroy enemies are not pausing when the level is paused
+
+enemies still being destroyed while game is paused
 
 ~~~~~~~~~~~~~~
 GENERAL IDEAS::
@@ -94,13 +112,9 @@ clean up game.lua
 
 clean up folder structure
 
-~~~~~~~~~~~~~~
-RESOLVED BUGSS::
-~~~~~~~~~~~~~~
+Add an overlay scene that can drop in over the top of the current - for pause / settings etc
 
-enemies not removing correctly when restarting level - check timers remove properly
+Add projectile to main game
 
-when hitting restart many times causes removeSelf timing bug for enemy table
-
-timers to destroy enemies are not pausing when the level is paused
+Have balloons explode on contact
 

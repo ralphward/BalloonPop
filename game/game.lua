@@ -16,8 +16,19 @@ local enemies = require("game.enemies")
 --
 local levelText             -- will be a display.newText() to let you know what level you're on
 local curLevel              -- will be used to hold the current level
-local isPaused = false
 local gm_timer              -- used for local game timer to start the game
+
+-- projectile firing variables
+local ox, oy = math.abs(display.screenOriginX), math.abs(display.screenOriginY)
+local cw, ch = display.contentWidth, display.contentHeight
+
+local prediction = display.newGroup() ; prediction.alpha = 0.2
+local line
+local xStartPos = 60
+local yStartPos = ch - 60
+
+local xEndPos
+local yEndPos
 
 
 function resetScore()
@@ -39,33 +50,26 @@ local function handleRestart( event )
     if event.phase == "ended" and gmData.state == "playing" then
         gmData.state = "restarting"
         physics.pause()
-        isPaused = true
         enemies.killTimers()
         enemies.removeEnemies()
         resetScore()
         enemies.spawnEnemies()
         physics.start()
-        isPaused = false
         gmData.state = "playing"
     end
 end
 
 local function handlePause( event )
 
-    if event.phase == "ended" then
-        if isPaused == false then
-            physics.pause()
-            for i, l_timer in pairs(gmData.timers) do    
-                if l_timer ~= nil then timer.pause(l_timer) end
-            end            
-            isPaused = true
-        elseif isPaused == true then
-            physics.start()
-            for i, l_timer in pairs(gmData.timers) do    
-                if l_timer ~= nil then timer.resume(l_timer) end
-            end            
-            isPaused = false
-        end
+    if event.phase == "ended" and gmData.state == "playing" then
+        physics.pause()
+        for i, l_timer in pairs(gmData.timers) do    
+            if l_timer ~= nil then timer.pause(l_timer) end
+        end            
+        isPaused = true
+        gmData.state = "paused"
+
+        composer.showOverlay("game.pause", { effect = "fromTop", time = 333, isModal = true })
     end
 
     return true
@@ -97,6 +101,62 @@ local function handleLoss( event )
     return true
 end
 
+local function getTrajectoryPoint( startingPosition, startingVelocity, n )
+
+    --velocity and gravity are given per second but we want time step values here
+    local t = 1/display.fps --seconds per time step at 60fps
+    local stepVelocity = { x=t*startingVelocity.x, y=t*startingVelocity.y }  --b2Vec2 stepVelocity = t * startingVelocity
+    local stepGravity = { x=t*0, y=t*9.8 }  --b2Vec2 stepGravity = t * t * m_world
+    return {
+        x = startingPosition.x + n * stepVelocity.x + 0.25 * (n*n+n) * stepGravity.x,
+        y = startingPosition.y + n * stepVelocity.y + 0.25 * (n*n+n) * stepGravity.y
+        }  --startingPosition + n * stepVelocity + 0.25 * (n*n+n) * stepGravity
+end
+
+
+
+local function updatePrediction( event )
+
+    display.remove( prediction )  --remove dot group
+    prediction = display.newGroup() ; prediction.alpha = 0.2  --now recreate it
+    xEndPos = event.x
+    yEndPos = event.y
+    local startingVelocity = { x=event.x-xStartPos, y=event.y-yStartPos }
+    
+    print ("X: " .. startingVelocity.x .. " Y: " .. startingVelocity.y)
+    for i = 1,180 do 
+        local s = { x=xStartPos, y=yStartPos }
+        local trajectoryPosition = getTrajectoryPoint( s, startingVelocity, i ) -- b2Vec2 trajectoryPosition = getTrajectoryPoint( startingPosition, startingVelocity, i )
+        local circ = display.newCircle( prediction, trajectoryPosition.x, trajectoryPosition.y, 5 )
+        print("Tx:" .. trajectoryPosition.x .. " Ty: " .. trajectoryPosition.y)
+    end
+end
+
+
+
+local function fireProj( event )
+    
+    local proj = display.newImageRect( "images/object.png", 64, 64 )
+    physics.addBody( proj, { bounce=0.2, density=1.0, radius=14 } )
+    proj.x, proj.y = xStartPos, yStartPos
+    local vx, vy = xEndPos-xStartPos, yEndPos-yStartPos
+    proj:setLinearVelocity( vx,vy )
+
+end
+
+local function screenTouch( event )
+
+    if (gmData.fireState == 0 and event.phase == "began") then
+        updatePrediction( event )
+        gmData.fireState = 1
+    elseif (event.phase == "began") then
+        fireProj( event )
+        gmData.fireState = 0
+    end
+    return true
+
+end
+
 --
 -- This function gets called when composer.gotoScene() gets called an either:
 --    a) the scene has never been visited before or
@@ -112,8 +172,7 @@ function scene:create( event )
     -- Composer to manage for you.
     local sceneGroup = self.view
 
-    physics.start()
-    physics.pause()
+    physics.start() ; physics.setGravity( 0,9.8 ) ; physics.setDrawMode( "normal" ) ; physics.pause()
 
     curLevel = myData.settings.currentLevel
 
@@ -193,6 +252,7 @@ function scene:show( event )
         physics.start()
         transition.to( levelText, { time = 500, alpha = 0 } )
         gm_timer = timer.performWithDelay( 500, enemies.spawnEnemies )
+        gmData.state = "playing"
 
     else -- event.phase == "will"
         -- The "will" phase happens before the scene transitions on screen.  This is a great
@@ -235,6 +295,18 @@ function scene:destroy( event )
     
 end
 
+function scene:resumeGame()
+    --code to resume game
+    physics.start()
+    for i, l_timer in pairs(gmData.timers) do    
+        if l_timer ~= nil then timer.resume(l_timer) end
+    end            
+    gmData.state = "playing"
+
+end
+
+Runtime:addEventListener( "touch", screenTouch )
+
 ---------------------------------------------------------------------------------
 -- END OF YOUR IMPLEMENTATION
 ---------------------------------------------------------------------------------
@@ -242,4 +314,5 @@ scene:addEventListener( "create", scene )
 scene:addEventListener( "show", scene )
 scene:addEventListener( "hide", scene )
 scene:addEventListener( "destroy", scene )
+
 return scene

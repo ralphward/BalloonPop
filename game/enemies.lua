@@ -33,7 +33,7 @@ function M:removeEnemies()
 end
 
 local function handleEnemyTouch( event )
-    if event.phase == "began" then
+    if gmData.state == "playing" then
 
         gmData.currentScore = gmData.currentScore + 10
         gmData.currentScoreDisplay.text = string.format( "%06d", gmData.currentScore )
@@ -59,11 +59,6 @@ local function destroyEnemy( event )
     gmData.g_enemies[event.source.params.id] = nil
 end
 
-local function moveEnemies( event )
-   local obj = event.source.objectID
-   obj:setLinearVelocity( 0, 0 )
-end
-
 local function spawnEnemy( event )
     local scene = composer.getScene("game.game")
     local sceneGroup = scene.view  
@@ -72,10 +67,11 @@ local function spawnEnemy( event )
     local enemy = display.newImage(params.image, params.xpos, -50)
     enemy.id = params.id
     sceneGroup:insert( enemy )
-    physics.addBody( enemy, "kinematic" )
+    physics.addBody( enemy, "dynamic" )
+    enemy.gravityScale = 0
     enemy:setLinearVelocity( 0, 40 )
 
-    enemy:addEventListener( "touch", handleEnemyTouch )
+    enemy:addEventListener( "preCollision", handleEnemyTouch )
 
     gmData.g_enemies[enemy.id] = enemy
     gmData.timers[enemy.id] = timer.performWithDelay( 10000, destroyEnemy )
