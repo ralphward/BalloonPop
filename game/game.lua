@@ -23,6 +23,7 @@ local ox, oy = math.abs(display.screenOriginX), math.abs(display.screenOriginY)
 local cw, ch = display.contentWidth, display.contentHeight
 
 local prediction = display.newGroup() ; prediction.alpha = 0.2
+local proj
 local line
 local xStartPos = 60
 local yStartPos = ch - 60
@@ -52,6 +53,9 @@ local function handleRestart( event )
         physics.pause()
         enemies.killTimers()
         enemies.removeEnemies()
+        display.remove( prediction )
+        display.remove( proj )
+        gmData.fireState = 0
         resetScore()
         enemies.spawnEnemies()
         physics.start()
@@ -67,6 +71,9 @@ local function handlePause( event )
             if l_timer ~= nil then timer.pause(l_timer) end
         end            
         isPaused = true
+        display.remove( prediction )
+        display.remove( proj )
+        gmData.fireState = 0
         gmData.state = "paused"
 
         composer.showOverlay("game.pause", { effect = "fromTop", time = 333, isModal = true })
@@ -121,14 +128,40 @@ local function updatePrediction( event )
     prediction = display.newGroup() ; prediction.alpha = 0.2  --now recreate it
     xEndPos = event.x
     yEndPos = event.y
+
+    -- given vertex and another point find the parabola formula
+    -- y=a(x−h)2+k
+    local y, a, x, h, k, xh
+    --h = event.x   
+    --k = event.y
+    --x = xStartPos
+    --y = yStartPos
+
+    h = -2
+    k = -2
+    x = -1
+    y = 1
+
+    -- solve for a
+    xh = (x - h) * (x - h)
+    y = y + (k * -1)
+    a = y / xh
+
+    -- convert to quadratic formula
+    -- y = ax^2 + bx + c
+    local b, c
+    b = -2 * a * h
+    c = a * (h * h) + k
+
+    -- find velocity and angle from quadratic forumula and plug into startingVelocity
+    
+
     local startingVelocity = { x=event.x-xStartPos, y=event.y-yStartPos }
     
-    print ("X: " .. startingVelocity.x .. " Y: " .. startingVelocity.y)
     for i = 1,180 do 
         local s = { x=xStartPos, y=yStartPos }
         local trajectoryPosition = getTrajectoryPoint( s, startingVelocity, i ) -- b2Vec2 trajectoryPosition = getTrajectoryPoint( startingPosition, startingVelocity, i )
         local circ = display.newCircle( prediction, trajectoryPosition.x, trajectoryPosition.y, 5 )
-        print("Tx:" .. trajectoryPosition.x .. " Ty: " .. trajectoryPosition.y)
     end
 end
 
@@ -136,7 +169,7 @@ end
 
 local function fireProj( event )
     
-    local proj = display.newImageRect( "images/object.png", 64, 64 )
+    proj = display.newImageRect( "images/object.png", 64, 64 )
     physics.addBody( proj, { bounce=0.2, density=1.0, radius=14 } )
     proj.x, proj.y = xStartPos, yStartPos
     local vx, vy = xEndPos-xStartPos, yEndPos-yStartPos
@@ -250,6 +283,7 @@ function scene:show( event )
     --
     if event.phase == "did" then
         physics.start()
+        Runtime:addEventListener( "touch", screenTouch )
         transition.to( levelText, { time = 500, alpha = 0 } )
         gm_timer = timer.performWithDelay( 500, enemies.spawnEnemies )
         gmData.state = "playing"
@@ -277,6 +311,9 @@ function scene:hide( event )
         -- stop timers, phsics, any audio playing
         --
         enemies.killTimers()
+        display.remove( prediction )
+        display.remove( proj )
+        Runtime:removeEventListener("touch", screenTouch)
         physics.stop()
     end
 
@@ -304,8 +341,6 @@ function scene:resumeGame()
     gmData.state = "playing"
 
 end
-
-Runtime:addEventListener( "touch", screenTouch )
 
 ---------------------------------------------------------------------------------
 -- END OF YOUR IMPLEMENTATION
