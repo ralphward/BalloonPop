@@ -120,7 +120,34 @@ local function getTrajectoryPoint( startingPosition, startingVelocity, n )
         }  --startingPosition + n * stepVelocity + 0.25 * (n*n+n) * stepGravity
 end
 
+local function calculateVerticalVelocityForHeight( desiredHeight )
+    if ( desiredHeight <= 0 ) then
+        return 0
+    end
+  
+    --gravity is given per second but we want time step values here
+    local t = 1 / display.fps
+    local stepGravity = t * t * 9.8
 
+    --quadratic equation setup (ax² + bx + c = 0)
+    local a = 0.5 / stepGravity
+    local b = 0.5
+    local c = desiredHeight
+
+    --check both possible solutions
+    local quadraticSolution1 = ( -b - math.sqrt( b*b - 4*a*c ) ) / (2*a);
+    local quadraticSolution2 = ( -b + math.sqrt( b*b - 4*a*c ) ) / (2*a);
+
+    --use the one which is positive
+    local v = quadraticSolution1;
+    if ( v < 0 ) then
+        v = quadraticSolution2
+    end
+  
+    --convert answer back to seconds
+    return v * 60 * -1
+
+end
 
 local function updatePrediction( event )
 
@@ -129,6 +156,7 @@ local function updatePrediction( event )
     xEndPos = event.x
     yEndPos = event.y
 
+--[[
     -- given vertex and another point find the parabola formula
     -- y=a(x−h)2+k
     local y, a, x, h, k, xh
@@ -154,9 +182,10 @@ local function updatePrediction( event )
     c = a * (h * h) + k
 
     -- find velocity and angle from quadratic forumula and plug into startingVelocity
-    
+   ]]-- 
 
-    local startingVelocity = { x=event.x-xStartPos, y=event.y-yStartPos }
+    local height = calculateVerticalVelocityForHeight(yStartPos - event.y)
+    local startingVelocity = { x=event.x-xStartPos,  y=height}
     
     for i = 1,180 do 
         local s = { x=xStartPos, y=yStartPos }
