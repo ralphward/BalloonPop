@@ -120,106 +120,40 @@ local function getTrajectoryPoint( startingPosition, startingVelocity, n )
         }  --startingPosition + n * stepVelocity + 0.25 * (n*n+n) * stepGravity
 end
 
-local function calculateVerticalVelocityForHeight( desiredHeight )
-    if ( desiredHeight <= 0 ) then
-        return 0
-    end
-  
-    --gravity is given per second but we want time step values here
-    local t = 1 / display.fps
-    local stepGravity = t * t * -9.8
+local function getYVelocityToPoint( startingPosition, startingVelocity, n )
 
-    print("step gravity" .. stepGravity)
-
-    --quadratic equation setup (ax² + bx + c = 0)
-    local a = 0.5 / stepGravity
-    local b = 0.5
-    local c = desiredHeight
-
-    print (" a b c " .. a .. " " .. b .. " " .. c)
-
-    --check both possible solutions
-    local quadraticSolution1 = ( -b - math.sqrt( b*b - 4*a*c ) ) / (2*a);
-    local quadraticSolution2 = ( -b + math.sqrt( b*b - 4*a*c ) ) / (2*a);
-
-    print( b*b - 4*a*c )
-
-    --use the one which is positive
-    local v = quadraticSolution1;
-    if ( v < 0 ) then
-        v = quadraticSolution2
-    end
-  
-    --convert answer back to seconds
-    return v * 60
-
+    --velocity and gravity are given per second but we want time step values here
+    local t = 1/display.fps --seconds per time step at 60fps
+    local stepVelocity = { x=t*startingVelocity.x, y=t*startingVelocity.y }  --b2Vec2 stepVelocity = t * startingVelocity
+    local stepGravity = { x=t*0, y=t*9.8 }  --b2Vec2 stepGravity = t * t * m_world
+    return {
+        v = stepGravity.y,
+        y = startingPosition.y + n * stepVelocity.y + 0.25 * (n*n+n) * stepGravity.y
+        }  --startingPosition + n * stepVelocity + 0.25 * (n*n+n) * stepGravity
 end
-
-
 
 local function updatePrediction( event )
 
---[[
-    -- given vertex and another point find the parabola formula
-    -- y=a(x−h)2+k
-    local y, a, x, h, k, xh
-    h = xEndPos   
-    k = yEndPos
-    x = xStartPos
-    y = yStartPos
-
-    --h = -2
-    --k = -2
-    --x = -1
-    --y = 1
-
-    -- solve for a
-    xh = (x - h) * (x - h)
-    y = y + (k * -1)
-    a = y / xh
-
-    -- convert to quadratic formula
-    -- y = ax^2 + bx + c
-    local b, c
-    b = -2 * a * h
-    c = a * (h * h) + k
-
-    print (" a b c " .. a .. " " .. b .. " " .. c)
-    -- find velocity and angle from quadratic forumula and plug into startingVelocity
-
-    --local height = calculateVerticalVelocityForHeight(yStartPos - event.y)
-    
-    --print ("height " .. height)
-]]--
     display.remove( prediction )  --remove dot group
     prediction = display.newGroup() ; prediction.alpha = 0.2  --now recreate it
     xEndPos = event.x
     yEndPos = event.y
 
-    --xEndPos = 280
-    --yEndPos = 120
-    xStartPos = 60
-    yStartPos = 260
-
-    local distance = yEndPos - yStartPos 
-    print ("distance " .. distance) 
+    local startingVelocity = { x=(xStartPos - event.x),  y=0}
+    local trajectoryPosition = {x = xEndPos,y = yEndPos}
+    local s = { x=xEndPos, y=yEndPos }
+    local i = 1
+    local v = 0
     
-    local a = 9.8 
-    local v = math.sqrt(2 * a * distance)
-    v = v * -1
+    while (trajectoryPosition.y < yStartPos) do
+        local trajectoryPosition = getTrajectoryPoint( s, startingVelocity, i ) -- b2Vec2 trajectoryPosition = getTrajectoryPoint( startingPosition, startingVelocity, i )
+        local circ = display.newCircle( prediction, trajectoryPosition.x, trajectoryPosition.y, 5 )
+        i = i + 1
+    end
 
-    --local height = (calculateVerticalVelocityForHeight(distance * -1) + yStartPos) * -1
-
-
-    print ("V0 " .. v)
-    --print ("V0" .. height)
-    print ("Start: (" .. xStartPos .. "," .. yStartPos .. ")")
-    print ("Vertex: (" .. xEndPos .. "," .. yEndPos .. ")")
-    print ("")
-
-    --local startingVelocity = { x=xEndPos-xStartPos,  y=v}
-    --local startingVelocity = { x=0,  y=v}
-    local startingVelocity = { x=(event.x-xStartPos) * 1.2,  y=(event.y - yStartPos) * 2.2}
+    print(0.25 * (i*i+i) * (1/60*9.8))
+    v = (0.25 * (i*i+i) * (1/60*9.8))
+    startingVelocity = { x=xEndPos-xStartPos,  y=(v * -1)}
     
     for i = 1,180 do 
         local s = { x=xStartPos, y=yStartPos }
