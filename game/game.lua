@@ -127,16 +127,22 @@ local function calculateVerticalVelocityForHeight( desiredHeight )
   
     --gravity is given per second but we want time step values here
     local t = 1 / display.fps
-    local stepGravity = t * t * 9.8
+    local stepGravity = t * t * -9.8
+
+    print("step gravity" .. stepGravity)
 
     --quadratic equation setup (ax² + bx + c = 0)
     local a = 0.5 / stepGravity
     local b = 0.5
     local c = desiredHeight
 
+    print (" a b c " .. a .. " " .. b .. " " .. c)
+
     --check both possible solutions
     local quadraticSolution1 = ( -b - math.sqrt( b*b - 4*a*c ) ) / (2*a);
     local quadraticSolution2 = ( -b + math.sqrt( b*b - 4*a*c ) ) / (2*a);
+
+    print( b*b - 4*a*c )
 
     --use the one which is positive
     local v = quadraticSolution1;
@@ -145,30 +151,27 @@ local function calculateVerticalVelocityForHeight( desiredHeight )
     end
   
     --convert answer back to seconds
-    return v * 60 * -1
+    return v * 60
 
 end
 
-local function updatePrediction( event )
 
-    display.remove( prediction )  --remove dot group
-    prediction = display.newGroup() ; prediction.alpha = 0.2  --now recreate it
-    xEndPos = event.x
-    yEndPos = event.y
+
+local function updatePrediction( event )
 
 --[[
     -- given vertex and another point find the parabola formula
     -- y=a(x−h)2+k
     local y, a, x, h, k, xh
-    --h = event.x   
-    --k = event.y
-    --x = xStartPos
-    --y = yStartPos
+    h = xEndPos   
+    k = yEndPos
+    x = xStartPos
+    y = yStartPos
 
-    h = -2
-    k = -2
-    x = -1
-    y = 1
+    --h = -2
+    --k = -2
+    --x = -1
+    --y = 1
 
     -- solve for a
     xh = (x - h) * (x - h)
@@ -181,11 +184,42 @@ local function updatePrediction( event )
     b = -2 * a * h
     c = a * (h * h) + k
 
+    print (" a b c " .. a .. " " .. b .. " " .. c)
     -- find velocity and angle from quadratic forumula and plug into startingVelocity
-   ]]-- 
 
-    local height = calculateVerticalVelocityForHeight(yStartPos - event.y)
-    local startingVelocity = { x=event.x-xStartPos,  y=height}
+    --local height = calculateVerticalVelocityForHeight(yStartPos - event.y)
+    
+    --print ("height " .. height)
+]]--
+    display.remove( prediction )  --remove dot group
+    prediction = display.newGroup() ; prediction.alpha = 0.2  --now recreate it
+    xEndPos = event.x
+    yEndPos = event.y
+
+    --xEndPos = 280
+    --yEndPos = 120
+    xStartPos = 60
+    yStartPos = 260
+
+    local distance = yEndPos - yStartPos 
+    print ("distance " .. distance) 
+    
+    local a = 9.8 
+    local v = math.sqrt(2 * a * distance)
+    v = v * -1
+
+    --local height = (calculateVerticalVelocityForHeight(distance * -1) + yStartPos) * -1
+
+
+    print ("V0 " .. v)
+    --print ("V0" .. height)
+    print ("Start: (" .. xStartPos .. "," .. yStartPos .. ")")
+    print ("Vertex: (" .. xEndPos .. "," .. yEndPos .. ")")
+    print ("")
+
+    --local startingVelocity = { x=xEndPos-xStartPos,  y=v}
+    --local startingVelocity = { x=0,  y=v}
+    local startingVelocity = { x=(event.x-xStartPos) * 1.2,  y=(event.y - yStartPos) * 2.2}
     
     for i = 1,180 do 
         local s = { x=xStartPos, y=yStartPos }

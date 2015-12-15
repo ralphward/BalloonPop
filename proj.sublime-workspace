@@ -4,12 +4,16 @@
 		"selected_items":
 		[
 			[
-				"fun",
-				"function	function"
-			],
-			[
 				"y",
 				"yStartPos"
+			],
+			[
+				"d",
+				"distance"
+			],
+			[
+				"fun",
+				"function	function"
 			],
 			[
 				"scene",
@@ -105,13 +109,10 @@
 			}
 		},
 		{
-			"contents": "local composer = require( \"composer\" )\nlocal scene = composer.newScene()\n\nlocal widget = require( \"widget\" )\nlocal json = require( \"json\" )\nlocal physics = require( \"physics\" )\n\nlocal utility = require( \"config.utility\" )\nlocal myData = require( \"config.mydata\" )\n\nlocal gmData = require( \"game.gamedata\" )\nlocal level_tips = require( \"game.level_tips\")\nlocal enemies = require(\"game.enemies\")\n-- \n-- define local variables here\n--\nlocal levelText             -- will be a display.newText() to let you know what level you're on\nlocal curLevel              -- will be used to hold the current level\nlocal gm_timer              -- used for local game timer to start the game\n\n-- projectile firing variables\nlocal ox, oy = math.abs(display.screenOriginX), math.abs(display.screenOriginY)\nlocal cw, ch = display.contentWidth, display.contentHeight\n\nlocal prediction = display.newGroup() ; prediction.alpha = 0.2\nlocal proj\nlocal line\nlocal xStartPos = 60\nlocal yStartPos = ch - 60\n\nlocal xEndPos\nlocal yEndPos\n\n\nfunction resetScore()\n\n    gmData.currentScore = 0\n    gmData.currentScoreDisplay.text = string.format( \"%06d\", gmData.currentScore )\n\n    if myData.settings.levels[curLevel].topScore == nil then\n        gmData.currentTopScore.text = string.format( \"%06d\", gmData.currentScore )\n    else\n        gmData.currentTopScore.text = string.format( \"%06d\", myData.settings.levels[curLevel].topScore )\n        gmData.topScore = myData.settings.levels[curLevel].topScore\n    end\n\n    return true \nend\n\nlocal function handleRestart( event )\n    if event.phase == \"ended\" and gmData.state == \"playing\" then\n        gmData.state = \"restarting\"\n        physics.pause()\n        enemies.killTimers()\n        enemies.removeEnemies()\n        display.remove( prediction )\n        display.remove( proj )\n        gmData.fireState = 0\n        resetScore()\n        enemies.spawnEnemies()\n        physics.start()\n        gmData.state = \"playing\"\n    end\nend\n\nlocal function handlePause( event )\n\n    if event.phase == \"ended\" and gmData.state == \"playing\" then\n        physics.pause()\n        for i, l_timer in pairs(gmData.timers) do    \n            if l_timer ~= nil then timer.pause(l_timer) end\n        end            \n        isPaused = true\n        display.remove( prediction )\n        display.remove( proj )\n        gmData.fireState = 0\n        gmData.state = \"paused\"\n\n        composer.showOverlay(\"game.pause\", { effect = \"fromTop\", time = 333, isModal = true })\n    end\n\n    return true\nend\n\n--\n-- define local functions here\n--\nlocal function handleWin( event )\n\n    if event.phase == \"ended\" then\n        myData.settings.levels[curLevel].topScore = gmData.topScore\n        myData.settings.currentLevel = curLevel + 1\n        if myData.settings.unlockedLevels < myData.settings.currentLevel then\n            myData.settings.unlockedLevels = myData.settings.currentLevel\n        end\n        utility.saveTable(myData.settings, \"settings.json\")\n        composer.removeScene(\"game.nextlevel\")\n        composer.gotoScene(\"game.nextlevel\", { time= 500, effect = \"crossFade\" })\n    end\n    return true\nend\n\nlocal function handleLoss( event )\n    if event.phase == \"ended\" then\n        composer.removeScene(\"game.gameover\")\n        composer.gotoScene(\"game.gameover\", { time= 500, effect = \"crossFade\" })\n    end\n    return true\nend\n\nlocal function getTrajectoryPoint( startingPosition, startingVelocity, n )\n\n    --velocity and gravity are given per second but we want time step values here\n    local t = 1/display.fps --seconds per time step at 60fps\n    local stepVelocity = { x=t*startingVelocity.x, y=t*startingVelocity.y }  --b2Vec2 stepVelocity = t * startingVelocity\n    local stepGravity = { x=t*0, y=t*9.8 }  --b2Vec2 stepGravity = t * t * m_world\n    return {\n        x = startingPosition.x + n * stepVelocity.x + 0.25 * (n*n+n) * stepGravity.x,\n        y = startingPosition.y + n * stepVelocity.y + 0.25 * (n*n+n) * stepGravity.y\n        }  --startingPosition + n * stepVelocity + 0.25 * (n*n+n) * stepGravity\nend\n\n--[[local function calculateVerticalVelocityForHeight( desiredHeight )\n    if ( desiredHeight <= 0 ) then\n        return 0\n    end\n  \n    --gravity is given per second but we want time step values here\n    local t = 1 / display.fps\n    local stepGravity = t * t * 9.8\n\n    --quadratic equation setup (ax² + bx + c = 0)\n    local a = 0.5 / stepGravity\n    local b = 0.5\n    local c = desiredHeight\n\n    --check both possible solutions\n    local quadraticSolution1 = ( -b - math.sqrt( b*b - 4*a*c ) ) / (2*a);\n    local quadraticSolution2 = ( -b + math.sqrt( b*b - 4*a*c ) ) / (2*a);\n\n    --use the one which is positive\n    local v = quadraticSolution1;\n    if ( v < 0 ) then\n        v = quadraticSolution2\n    end\n  \n    --convert answer back to seconds\n    return v * 60 * -1\n\nend\n--]]\n\n\nlocal function updatePrediction( event )\n\n    display.remove( prediction )  --remove dot group\n    prediction = display.newGroup() ; prediction.alpha = 0.2  --now recreate it\n    xEndPos = event.x\n    yEndPos = event.y\n\n--[[\n    -- given vertex and another point find the parabola formula\n    -- y=a(x−h)2+k\n    local y, a, x, h, k, xh\n    --h = event.x   \n    --k = event.y\n    --x = xStartPos\n    --y = yStartPos\n\n    h = -2\n    k = -2\n    x = -1\n    y = 1\n\n    -- solve for a\n    xh = (x - h) * (x - h)\n    y = y + (k * -1)\n    a = y / xh\n\n    -- convert to quadratic formula\n    -- y = ax^2 + bx + c\n    local b, c\n    b = -2 * a * h\n    c = a * (h * h) + k\n\n    -- find velocity and angle from quadratic forumula and plug into startingVelocity\n\n    local height = calculateVerticalVelocityForHeight(yStartPos - event.y)\n   ]]-- \n\n\n    local startingVelocity = { x=event.x-xStartPos,  y=height}\n    \n    for i = 1,180 do \n        local s = { x=xStartPos, y=yStartPos }\n        local trajectoryPosition = getTrajectoryPoint( s, startingVelocity, i ) -- b2Vec2 trajectoryPosition = getTrajectoryPoint( startingPosition, startingVelocity, i )\n        local circ = display.newCircle( prediction, trajectoryPosition.x, trajectoryPosition.y, 5 )\n    end\nend\n\n\n\nlocal function fireProj( event )\n    \n    proj = display.newImageRect( \"images/object.png\", 64, 64 )\n    physics.addBody( proj, { bounce=0.2, density=1.0, radius=14 } )\n    proj.x, proj.y = xStartPos, yStartPos\n    local vx, vy = xEndPos-xStartPos, yEndPos-yStartPos\n    proj:setLinearVelocity( vx,vy )\n\nend\n\nlocal function screenTouch( event )\n\n    if (gmData.fireState == 0 and event.phase == \"began\") then\n        updatePrediction( event )\n        gmData.fireState = 1\n    elseif (event.phase == \"began\") then\n        fireProj( event )\n        gmData.fireState = 0\n    end\n    return true\n\nend\n\n--\n-- This function gets called when composer.gotoScene() gets called an either:\n--    a) the scene has never been visited before or\n--    b) you called composer.removeScene() or composer.removeHidden() from some other\n--       scene.  It's possible (and desirable in many cases) to call this once, but \n--       show it multiple times.\n--\nfunction scene:create( event )\n    --\n    -- self in this case is \"scene\", the scene object for this level. \n    -- Make a local copy of the scene's \"view group\" and call it \"sceneGroup\". \n    -- This is where you must insert everything (display.* objects only) that you want\n    -- Composer to manage for you.\n    local sceneGroup = self.view\n\n    physics.start() ; physics.setGravity( 0,9.8 ) ; physics.setDrawMode( \"normal\" ) ; physics.pause()\n\n    curLevel = myData.settings.currentLevel\n\n    --\n    -- create your objects here\n    --\n\n    -- setup local background    \n    local background = display.newRect(display.contentCenterX, display.contentCenterY, display.contentWidth, display.contentHeight)\n    background:setFillColor( 0.6, 0.7, 0.3 )\n    sceneGroup:insert(background)\n\n    levelText = display.newText(curLevel, 0, 0, native.systemFontBold, 48 )\n    levelText:setFillColor( 0 )\n    levelText.x = display.contentCenterX\n    levelText.y = display.contentCenterY\n    sceneGroup:insert( levelText )\n\n    gmData.currentScoreDisplay = display.newText(\"000000\", display.contentWidth - 50, 10, native.systemFont, 16 )\n    sceneGroup:insert( gmData.currentScoreDisplay )\n\n    gmData.currentTopScore = display.newText(\"000000\", display.contentWidth - 50, 30, native.systemFont, 16 )\n    sceneGroup:insert( gmData.currentTopScore )\n\n    -- TODO:: Remove these buttons\n    local iWin = widget.newButton({\n        label = \"I Win!\",\n        onEvent = handleWin\n    })\n    sceneGroup:insert(iWin)\n    iWin.x = display.contentCenterX - 100\n    iWin.y = display.contentHeight - 60\n\n    local iLoose = widget.newButton({\n        label = \"I Loose!\",\n        onEvent = handleLoss\n    })\n    sceneGroup:insert(iLoose)\n    iLoose.x = display.contentCenterX + 100\n    iLoose.y = display.contentHeight - 60\n\n    local pause = widget.newButton({\n        defaultFile = \"images/pause.png\",\n        onEvent = handlePause\n    })\n    sceneGroup:insert(pause)\n    pause.x = display.contentCenterX - 100\n    pause.y = display.contentHeight - 20\n\n    local pause = widget.newButton({\n        defaultFile = \"images/restart.png\",\n        onEvent = handleRestart\n    })\n    sceneGroup:insert(pause)\n    pause.x = display.contentCenterX - 140\n    pause.y = display.contentHeight - 20\n\n\nend\n\n--\n-- This gets called twice, once before the scene is moved on screen and again once\n-- afterwards as a result of calling composer.gotoScene()\n--\nfunction scene:show( event )\n    local sceneGroup = self.view\n\n    --\n    -- event.phase == \"did\" happens after the scene has been transitioned on screen. \n    -- Here is where you start up things that need to start happening, such as timers,\n    -- tranistions, physics, music playing, etc. \n    -- In this case, resume physics by calling physics.start()\n    -- Fade out the levelText (i.e start a transition)\n    -- Start up the enemy spawning engine after the levelText fades\n    --\n    if event.phase == \"did\" then\n        physics.start()\n        Runtime:addEventListener( \"touch\", screenTouch )\n        transition.to( levelText, { time = 500, alpha = 0 } )\n        gm_timer = timer.performWithDelay( 500, enemies.spawnEnemies )\n        gmData.state = \"playing\"\n\n    else -- event.phase == \"will\"\n        -- The \"will\" phase happens before the scene transitions on screen.  This is a great\n        -- place to \"reset\" things that might be reset, i.e. move an object back to its starting\n        -- position. Since the scene isn't on screen yet, your users won't see things \"jump\" to new\n        -- locations. In this case, reset the score to 0.\n        resetScore()\n    end\nend\n\n--\n-- This function gets called everytime you call composer.gotoScene() from this module.\n-- It will get called twice, once before we transition the scene off screen and once again \n-- after the scene is off screen.\nfunction scene:hide( event )\n    local sceneGroup = self.view\n    \n    if event.phase == \"will\" then\n        -- The \"will\" phase happens before the scene is transitioned off screen. Stop\n        -- anything you started elsewhere that could still be moving or triggering such as:\n        -- Remove enterFrame listeners here\n        -- stop timers, phsics, any audio playing\n        --\n        enemies.killTimers()\n        display.remove( prediction )\n        display.remove( proj )\n        Runtime:removeEventListener(\"touch\", screenTouch)\n        physics.stop()\n    end\n\nend\n\n--\n-- When you call composer.removeScene() from another module, composer will go through and\n-- remove anything created with display.* and inserted into the scene's view group for you. In\n-- many cases that's sufficent to remove your scene. \n--\n-- But there may be somethings you loaded, like audio in scene:create() that won't be disposed for\n-- you. This is where you dispose of those things.\n-- In most cases there won't be much to do here.\nfunction scene:destroy( event )\n    local sceneGroup = self.view\n    \nend\n\nfunction scene:resumeGame()\n    --code to resume game\n    physics.start()\n    for i, l_timer in pairs(gmData.timers) do    \n        if l_timer ~= nil then timer.resume(l_timer) end\n    end            \n    gmData.state = \"playing\"\n\nend\n\n---------------------------------------------------------------------------------\n-- END OF YOUR IMPLEMENTATION\n---------------------------------------------------------------------------------\nscene:addEventListener( \"create\", scene )\nscene:addEventListener( \"show\", scene )\nscene:addEventListener( \"hide\", scene )\nscene:addEventListener( \"destroy\", scene )\n\nreturn scene",
 			"file": "game/game.lua",
-			"file_size": 12891,
-			"file_write_time": 130945604102191058,
 			"settings":
 			{
-				"buffer_size": 12519,
+				"buffer_size": 13428,
 				"line_ending": "Windows"
 			}
 		},
@@ -121,6 +122,39 @@
 			{
 				"buffer_size": 442,
 				"line_ending": "Windows"
+			}
+		},
+		{
+			"contents": "\nWindows simulator build date: Oct  5 2015 @ 17:13:45\n\n\nCopyright (C) 2009-2015  C o r o n a   L a b s   I n c .\n	Version: 3.0.0\n	Build: 2015.2731\nPlatform: SM-G900S / x64 / 6.2 / GeForce GTX 650 Ti BOOST/PCIe/SSE2 / 4.5.0 NVIDIA 355.82 / 2015.2731\nLoading project from:   C:\\git\\BalloonPop\nProject sandbox folder: C:\\Users\\Shimara\\AppData\\Local\\Corona Labs\\Corona Simulator\\Sandbox\\balloonpop-57EF290E16D987980C58ECF67A085D9E\\Documents\nset_breakpoint(C:\\git\\BalloonPop\\game\\game.lua,211)\nRUN: breakpoints: {\"C:\\\\git\\\\BalloonPop\\\\game\\\\game.lua\":{\"211\":true}}\nWARNING: display.setStatusBarMode() not supported in the simulator for SM-G900S device\nsystemEvent applicationStart\ntable: 0A57C7E8 {\n  [phase] => \"will\"\n  [name] => \"show\"\n}\ntable: 0A60EA70 {\n  [phase] => \"did\"\n  [name] => \"show\"\n}\ndistance -140\nstep gravity-0.0027222222222222\n a b c -91.836734693878 0.25 140\n51428.633928571\n",
+			"settings":
+			{
+				"buffer_size": 933,
+				"line_ending": "Windows",
+				"name": "Console",
+				"read_only": true,
+				"scratch": true
+			}
+		},
+		{
+			"contents": "Locals:\nprediction = (GroupObject) { \"numChildren\": 0, \"anchorChildren\": \"false\", \"xScale\": 1, \"yScale\": 1, \"rotation\": 0, \"width\": 0, \"height\": 0, \"isVisible\": \"true\", \"isHitTestable\": \"false\", \"alpha\": 0.2, \"x\": 0, \"y\": 0, \"anchorX\": 0.5, \"anchorY\": 0.5, \"contentBounds\": { \"xMin\": 0, \"xMax\": 0, \"yMax\": 0, \"yMin\": 0 }, \"contentWidth\": -2.14748e+009, \"contentHeight\": 0, \"maskX\": 0, \"maskY\": 0, \"maskScaleX\": 0, \"maskScaleY\": 0, \"maskRotation\": 0, \"isHitTestMasked\": \"false\" }\nt = (number) 0.016666666666667\nheight = (number) 74.16274839098\ndistance = (number) -140\nxEndPos = (number) 280\nyEndPos = (number) 120\nv = (number) -405.7585488933\ngetTrajectoryPoint = (function) game\\game.lua:111\na = (number) -0.16333333333333\ncalculateVerticalVelocityForHeight = (function) game\\game.lua:123\nxStartPos = (number) 60\nyStartPos = (number) 260\nevent = (table) {\"y\":122,\"x\":243,\"time\":6333,\"id\":\"<userdata>\",\"phase\":\"began\",\"yStart\":122,\"xStart\":243,\"name\":\"touch\"}\n",
+			"settings":
+			{
+				"buffer_size": 960,
+				"line_ending": "Windows",
+				"name": "Variables",
+				"read_only": true,
+				"scratch": true
+			}
+		},
+		{
+			"contents": "Backtrace:\n*[  1] updatePrediction at game\\game.lua:213\n [  2] (nil) at game\\game.lua:245\n [  3] (nil) at =?:0\n",
+			"settings":
+			{
+				"buffer_size": 111,
+				"line_ending": "Windows",
+				"name": "Lua Stack",
+				"read_only": true,
+				"scratch": true
 			}
 		}
 	],
@@ -171,9 +205,10 @@
 	],
 	"file_history":
 	[
+		"/C/git/BalloonPop/game/game.lua",
+		"/C/tmp/logit.txt",
 		"/C/Users/Shimara/Desktop/PredictingTrajectory/main.lua",
 		"/C/git/BalloonPop/game/leveldata.lua",
-		"/C/git/BalloonPop/game/game.lua",
 		"/C/git/BalloonPop/game/enemies.lua",
 		"/C/git/BalloonPop/game/pause.lua",
 		"/C/git/BalloonPop/game/gamedata.lua",
@@ -234,6 +269,8 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"event",
+			"setScale",
 			"display",
 			"proj",
 			"display.remove",
@@ -354,7 +391,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 7,
 					"type": "text"
 				},
 				{
@@ -384,7 +421,7 @@
 						"translation.y": 630.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 6,
 					"type": "text"
 				},
 				{
@@ -400,8 +437,8 @@
 						"selection":
 						[
 							[
-								384,
-								385
+								460,
+								460
 							]
 						],
 						"settings":
@@ -423,15 +460,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 12519,
+						"buffer_size": 13428,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								4119,
-								4119
+								4687,
+								4687
 							]
 						],
 						"settings":
@@ -441,7 +478,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 2227.0,
+						"translation.y": 1835.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
@@ -472,6 +509,111 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
+					"stack_index": 5,
+					"type": "text"
+				}
+			]
+		},
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 5,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 933,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"line_numbers": false,
+							"syntax": "Packages/Text/Plain text.tmLanguage",
+							"word_wrap": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 123.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				}
+			]
+		},
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 6,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 960,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"line_numbers": false,
+							"syntax": "Packages/Corona Editor/CoronaSDKLua.tmLanguage",
+							"word_wrap": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 148.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				}
+			]
+		},
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 7,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 111,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"line_numbers": false,
+							"syntax": "Packages/Corona Editor/CoronaSDKLua.tmLanguage",
+							"word_wrap": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
 					"stack_index": 2,
 					"type": "text"
 				}
@@ -493,18 +635,39 @@
 			[
 				0,
 				0,
-				1,
+				2,
 				1
+			],
+			[
+				0,
+				1,
+				2,
+				2
+			],
+			[
+				0,
+				2,
+				1,
+				3
+			],
+			[
+				1,
+				2,
+				2,
+				3
 			]
 		],
 		"cols":
 		[
 			0.0,
+			0.6,
 			1.0
 		],
 		"rows":
 		[
 			0.0,
+			0.5,
+			0.7,
 			1.0
 		]
 	},
