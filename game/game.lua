@@ -23,13 +23,11 @@ local ox, oy = math.abs(display.screenOriginX), math.abs(display.screenOriginY)
 local cw, ch = display.contentWidth, display.contentHeight
 
 local prediction = display.newGroup() ; prediction.alpha = 0.2
-local proj
-local line
-local xStartPos = 60
-local yStartPos = ch - 60
+local proj, line
+local x0 = 60
+local y0 = ch - 60
 
-local xEndPos
-local yEndPos
+local xf, yf, vy, vx
 
 
 function resetScore()
@@ -109,7 +107,6 @@ local function handleLoss( event )
 end
 
 local function getTrajectoryPoint( startingPosition, startingVelocity, n )
-
     --velocity and gravity are given per second but we want time step values here
     local t = 1/display.fps --seconds per time step at 60fps
     local stepVelocity = { x=t*startingVelocity.x, y=t*startingVelocity.y }  --b2Vec2 stepVelocity = t * startingVelocity
@@ -120,43 +117,24 @@ local function getTrajectoryPoint( startingPosition, startingVelocity, n )
         }  --startingPosition + n * stepVelocity + 0.25 * (n*n+n) * stepGravity
 end
 
-local function getYVelocityToPoint( startingPosition, startingVelocity, n )
-
-    --velocity and gravity are given per second but we want time step values here
-    local t = 1/display.fps --seconds per time step at 60fps
-    local stepVelocity = { x=t*startingVelocity.x, y=t*startingVelocity.y }  --b2Vec2 stepVelocity = t * startingVelocity
-    local stepGravity = { x=t*0, y=t*9.8 }  --b2Vec2 stepGravity = t * t * m_world
-    return {
-        v = stepGravity.y,
-        y = startingPosition.y + n * stepVelocity.y + 0.25 * (n*n+n) * stepGravity.y
-        }  --startingPosition + n * stepVelocity + 0.25 * (n*n+n) * stepGravity
-end
 
 local function updatePrediction( event )
-
     display.remove( prediction )  --remove dot group
     prediction = display.newGroup() ; prediction.alpha = 0.2  --now recreate it
-    xEndPos = event.x
-    yEndPos = event.y
+    xf = event.x
+    yf = event.y
 
-    local startingVelocity = { x=(xStartPos - event.x),  y=0}
-    local trajectoryPosition = {x = xEndPos,y = yEndPos}
-    local s = { x=xEndPos, y=yEndPos }
-    local i = 1
-    local v = 0
-    
-    while (trajectoryPosition.y < yStartPos) do
-        local trajectoryPosition = getTrajectoryPoint( s, startingVelocity, i ) -- b2Vec2 trajectoryPosition = getTrajectoryPoint( startingPosition, startingVelocity, i )
-        local circ = display.newCircle( prediction, trajectoryPosition.x, trajectoryPosition.y, 5 )
-        i = i + 1
-    end
+    local dy = yf - y0
+    local t = 1 / display.fps
+    local a = t * -9.8
 
-    print(0.25 * (i*i+i) * (1/60*9.8))
-    v = (0.25 * (i*i+i) * (1/60*9.8))
-    startingVelocity = { x=xEndPos-xStartPos,  y=(v * -1)}
+    vy = math.sqrt(2 * a * (dy * 0.5)) * display.fps * -1
+    vx = (xf - x0) * math.sqrt(a / (2 * (dy * 0.5))) * 30
+
+    local startingVelocity = { x=vx,  y=vy}
     
     for i = 1,180 do 
-        local s = { x=xStartPos, y=yStartPos }
+        local s = { x=x0, y=y0 }
         local trajectoryPosition = getTrajectoryPoint( s, startingVelocity, i ) -- b2Vec2 trajectoryPosition = getTrajectoryPoint( startingPosition, startingVelocity, i )
         local circ = display.newCircle( prediction, trajectoryPosition.x, trajectoryPosition.y, 5 )
     end
@@ -165,23 +143,19 @@ end
 
 
 local function fireProj( event )
-    
-    proj = display.newImageRect( "images/object.png", 64, 64 )
-    physics.addBody( proj, { bounce=0.2, density=1.0, radius=14 } )
-    proj.x, proj.y = xStartPos, yStartPos
-    local vx, vy = xEndPos-xStartPos, yEndPos-yStartPos
-    proj:setLinearVelocity( vx,vy )
-
+    if (event.phase == "began") then
+        proj = display.newImageRect( "images/object.png", 64, 64 )
+        physics.addBody( proj, { bounce=0.2, density=1.0, radius=14 } )
+        proj.x, proj.y = x0, y0
+        proj:setLinearVelocity( vx,vy )
+        gmData.fireState = 0
+    end
 end
 
 local function screenTouch( event )
-
-    if (gmData.fireState == 0 and event.phase == "began") then
-        updatePrediction( event )
+    if (event.phase == "began" and gmData.fireState == 0) then
         gmData.fireState = 1
-    elseif (event.phase == "began") then
-        fireProj( event )
-        gmData.fireState = 0
+        updatePrediction( event )
     end
     return true
 
@@ -252,13 +226,21 @@ function scene:create( event )
     pause.x = display.contentCenterX - 100
     pause.y = display.contentHeight - 20
 
-    local pause = widget.newButton({
+    local restart = widget.newButton({
         defaultFile = "images/restart.png",
         onEvent = handleRestart
     })
-    sceneGroup:insert(pause)
-    pause.x = display.contentCenterX - 140
-    pause.y = display.contentHeight - 20
+    sceneGroup:insert(restart)
+    restart.x = display.contentCenterX - 140
+    restart.y = display.contentHeight - 20
+
+    local fire = widget.newButton({
+        defaultFile = "images/pause.png",
+        onEvent = fireProj
+    })
+    sceneGroup:insert(fire)
+    fire.x = display.contentCenterX - 180
+    fire.y = display.contentHeight - 20
 
 
 end
