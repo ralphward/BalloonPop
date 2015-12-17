@@ -2,9 +2,9 @@
 TODO::
 ~~~~~~~~~~~~~~
 
-Update General ideas to more current idea
+Limit the projectiles better
 
-Better firing ability - touch screen is frustrating
+Update General ideas to more current idea
 
 Complete level 1
 
@@ -40,9 +40,10 @@ adds for the game
 BUGSS::
 ~~~~~~~~~~~~~~
 
-projectile path is not removed from scene when required - need a collection to hold the objects
+Balloons explode in the wrong spot
 
-Balloons explode is in the wrong spot
+Runtime bugs when closing scene's too quickly
+ - need to re structure a little enemies a little - each enemy should be a display object with parameters. Enemies should be added to a display group so can remove all at once cleanly
 
 ~~~~~~~~~~~~~~
 RESOLVED BUGSS::
@@ -117,4 +118,8 @@ Add an overlay scene that can drop in over the top of the current - for pause / 
 Add projectile to main game
 
 Have balloons explode on contact
+
+projectile path is not removed from scene when required - need a collection to hold the objects
+
+Better firing ability - touch screen is frustrating
 
