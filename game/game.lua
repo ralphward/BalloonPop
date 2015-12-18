@@ -22,13 +22,34 @@ local gm_timer              -- used for local game timer to start the game
 local ox, oy = math.abs(display.screenOriginX), math.abs(display.screenOriginY)
 local cw, ch = display.contentWidth, display.contentHeight
 
-local prediction = display.newGroup() ; prediction.alpha = 0.2
-local proj, line
+local proj
 local x0 = 60
 local y0 = ch - 60
+local ppm = 60 --pixel per metre
+local line = {}
 
 local xf, yf, vy, vx
 
+function removeLine()
+    for i, circ in pairs(line) do    
+        -- this test is to avoid race time conditions where user may press restart level very quickly
+        if (circ.removeSelf) ~= nil then 
+            circ:removeSelf() 
+        end
+        if circ ~= nil then 
+            circ = nil
+        end
+    end            
+end
+
+function removeProj()
+    if proj ~= nil then 
+        if (proj.removeSelf) ~= nil then 
+            proj:removeSelf() 
+        end
+        proj = nil
+    end    
+end
 
 function resetScore()
 
@@ -47,12 +68,13 @@ end
 
 local function handleRestart( event )
     if event.phase == "ended" and gmData.state == "playing" then
+        local sceneGroup = scene.view  
         gmData.state = "restarting"
         physics.pause()
         enemies.killTimers()
         enemies.removeEnemies()
-        display.remove( prediction )
-        display.remove( proj )
+        removeLine()
+        removeProj()
         gmData.fireState = 0
         resetScore()
         enemies.spawnEnemies()
@@ -69,9 +91,6 @@ local function handlePause( event )
             if l_timer ~= nil then timer.pause(l_timer) end
         end            
         isPaused = true
-        display.remove( prediction )
-        display.remove( proj )
-        gmData.fireState = 0
         gmData.state = "paused"
 
         composer.showOverlay("game.pause", { effect = "fromTop", time = 333, isModal = true })
@@ -112,49 +131,60 @@ local function getTrajectoryPoint( startingPosition, startingVelocity, n )
     local stepVelocity = { x=t*startingVelocity.x, y=t*startingVelocity.y }  --b2Vec2 stepVelocity = t * startingVelocity
     local stepGravity = { x=t*0, y=t*9.8 }  --b2Vec2 stepGravity = t * t * m_world
     return {
-        x = startingPosition.x + n * stepVelocity.x + 0.25 * (n*n+n) * stepGravity.x,
-        y = startingPosition.y + n * stepVelocity.y + 0.25 * (n*n+n) * stepGravity.y
+        x = startingPosition.x + n * stepVelocity.x + 0.5 * (n*n+n) * stepGravity.x,
+        y = startingPosition.y + n * stepVelocity.y + 0.5 * (n*n+n) * stepGravity.y
         }  --startingPosition + n * stepVelocity + 0.25 * (n*n+n) * stepGravity
 end
 
 
 local function updatePrediction( event )
-    display.remove( prediction )  --remove dot group
-    prediction = display.newGroup() ; prediction.alpha = 0.2  --now recreate it
-    xf = event.x
-    yf = event.y
+    if (event.y < y0 and gmData.state == "playing") then
+        local sceneGroup = scene.view
+        removeLine()
 
-    local dy = yf - y0
-    local t = 1 / display.fps
-    local a = t * -9.8
+        xf = event.x
+        yf = event.y
 
-    vy = math.sqrt(2 * a * (dy * 0.5)) * display.fps * -1
-    vx = (xf - x0) * math.sqrt(a / (2 * (dy * 0.5))) * 30
+        local dy = (yf - y0) * ppm
+        local dx = (xf - x0) * ppm
+        local t = 1 / display.fps
+        local a = t * t * -9.8
 
-    local startingVelocity = { x=vx,  y=vy}
-    
-    for i = 1,180 do 
-        local s = { x=x0, y=y0 }
-        local trajectoryPosition = getTrajectoryPoint( s, startingVelocity, i ) -- b2Vec2 trajectoryPosition = getTrajectoryPoint( startingPosition, startingVelocity, i )
-        local circ = display.newCircle( prediction, trajectoryPosition.x, trajectoryPosition.y, 5 )
+        vy = math.sqrt(2 * a * dy) * display.fps * -1
+        vx = dx * math.sqrt(a / (2 * dy)) * display.fps
+
+        local startingVelocity = { x=vx,  y=vy}
+        
+        for i = 1,180 do 
+            local s = { x=x0, y=y0 }
+            local trajectoryPosition = getTrajectoryPoint( s, startingVelocity, i ) -- b2Vec2 trajectoryPosition = getTrajectoryPoint( startingPosition, startingVelocity, i )
+            line[i] = display.newCircle( trajectoryPosition.x, trajectoryPosition.y, 5 )
+            sceneGroup:insert(line[i])
+        end
+        gmData.fireState = 1                
     end
 end
 
 
 
 local function fireProj( event )
-    if (event.phase == "began") then
+    if (event.phase == "began" and gmData.fireState == 1 and gmData.state == "playing") then
+        local sceneGroup = scene.view
+        display.remove( prediction )  --remove dot group
         proj = display.newImageRect( "images/object.png", 64, 64 )
         physics.addBody( proj, { bounce=0.2, density=1.0, radius=14 } )
         proj.x, proj.y = x0, y0
         proj:setLinearVelocity( vx,vy )
-        gmData.fireState = 0
+        sceneGroup:insert(proj)
+
+        -- limit projectiles to one per line, uncomment below
+        --gmData.fireState = 0
+        --removeLine
     end
 end
 
 local function screenTouch( event )
-    if (event.phase == "began" and gmData.fireState == 0) then
-        gmData.fireState = 1
+    if (event.phase == "began") then
         updatePrediction( event )
     end
     return true
@@ -176,7 +206,7 @@ function scene:create( event )
     -- Composer to manage for you.
     local sceneGroup = self.view
 
-    physics.start() ; physics.setGravity( 0,9.8 ) ; physics.setDrawMode( "normal" ) ; physics.pause()
+    physics.start() ; physics.setGravity( 0,9.8 ) ; physics.setDrawMode( "normal" ) ; physics.setScale(ppm) ; physics.pause()
 
     curLevel = myData.settings.currentLevel
 
@@ -291,7 +321,7 @@ function scene:hide( event )
         --
         enemies.killTimers()
         display.remove( prediction )
-        display.remove( proj )
+        sceneGroup:remove( proj )
         Runtime:removeEventListener("touch", screenTouch)
         physics.stop()
     end
