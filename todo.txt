@@ -2,6 +2,10 @@
 TODO::
 ~~~~~~~~~~~~~~
 
+Add ability to win a level
+
+Add ability to loose a level
+
 Might Need to re structure a little enemies a little
 
 Update General ideas to more current idea
@@ -17,10 +21,6 @@ Make a better explosion
 Explode another object
 
 Add a castle to defend at the bottom
-
-Add ability to win a level
-
-Add ability to loose a level
 
 Add some sound effects
 
@@ -40,11 +40,11 @@ adds for the game
 BUGSS::
 ~~~~~~~~~~~~~~
 
-Balloons explode in the wrong spot
-
 ~~~~~~~~~~~~~~
 RESOLVED BUGSS::
 ~~~~~~~~~~~~~~
+
+Balloons explode in the wrong spot
 
 Runtime bugs when closing scene's too quickly
 
@@ -123,3 +123,4 @@ Better firing ability - touch screen is frustrating
 
 Limit the projectiles better
 
+Use correct collision filters

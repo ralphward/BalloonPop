@@ -170,9 +170,10 @@ end
 local function fireProj( event )
     if (event.phase == "began" and gmData.fireState == 1 and gmData.state == "playing") then
         local sceneGroup = scene.view
+        local collFilter = { categoryBits = 2, maskBits = 1}
         display.remove( prediction )  --remove dot group
         proj = display.newImageRect( "images/object.png", 64, 64 )
-        physics.addBody( proj, { bounce=0.2, density=1.0, radius=14 } )
+        physics.addBody( proj, { bounce=0.2, density=1.0, radius=14 , filter = collFilter} )
         proj.x, proj.y = x0, y0
         proj:setLinearVelocity( vx,vy )
         sceneGroup:insert(proj)
