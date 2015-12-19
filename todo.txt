@@ -2,7 +2,11 @@
 TODO::
 ~~~~~~~~~~~~~~
 
-Limit the projectiles better
+Add ability to win a level
+
+Add ability to loose a level
+
+Might Need to re structure a little enemies a little
 
 Update General ideas to more current idea
 
@@ -17,10 +21,6 @@ Make a better explosion
 Explode another object
 
 Add a castle to defend at the bottom
-
-Add ability to win a level
-
-Add ability to loose a level
 
 Add some sound effects
 
@@ -40,14 +40,13 @@ adds for the game
 BUGSS::
 ~~~~~~~~~~~~~~
 
-Balloons explode in the wrong spot
-
-Runtime bugs when closing scene's too quickly
- - need to re structure a little enemies a little - each enemy should be a display object with parameters. Enemies should be added to a display group so can remove all at once cleanly
-
 ~~~~~~~~~~~~~~
 RESOLVED BUGSS::
 ~~~~~~~~~~~~~~
+
+Balloons explode in the wrong spot
+
+Runtime bugs when closing scene's too quickly
 
 enemies not removing correctly when restarting level - check timers remove properly
 
@@ -61,12 +60,11 @@ enemies still being destroyed while game is paused
 GENERAL IDEAS::
 ~~~~~~~~~~~~~~
 
-Castle defense game essentially - bad things fall - click to remove them
+Castle defense game essentially - bad things fall - fire projectile to remove them
 - Too many get through it's game over
 - Get to the end of a level when everything is destroyed
 
 Ideas for objects
-- can be thrown at other objects
 - Do more damage than other objects
 - Objects that change color - should be clicked at a certain color
 - Objects that explode things close by
@@ -123,3 +121,6 @@ projectile path is not removed from scene when required - need a collection to h
 
 Better firing ability - touch screen is frustrating
 
+Limit the projectiles better
+
+Use correct collision filters

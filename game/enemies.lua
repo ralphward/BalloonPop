@@ -46,8 +46,8 @@ local function handleEnemyTouch( event )
         gmData.g_enemies[event.target.id] = nil
         timer.cancel(gmData.timers[event.target.id])
 
-        vent.emitX = event.x
-        vent.emitY = event.y
+        vent.emitX = event.target.x
+        vent.emitY = event.target.y
         vent:start()
         
         return true
@@ -62,16 +62,17 @@ end
 local function spawnEnemy( event )
     local scene = composer.getScene("game.game")
     local sceneGroup = scene.view  
+    local collFilter = { categoryBits = 1, maskBits = 2}
 
     local params = event.source.params
     local enemy = display.newImage(params.image, params.xpos, -50)
     enemy.id = params.id
     sceneGroup:insert( enemy )
-    physics.addBody( enemy, "dynamic" )
+    physics.addBody( enemy, "dynamic", { filter = collFilter})
     enemy.gravityScale = 0
     enemy:setLinearVelocity( 0, 40 )
 
-    enemy:addEventListener( "preCollision", handleEnemyTouch )
+    enemy:addEventListener( "collision", handleEnemyTouch )
 
     gmData.g_enemies[enemy.id] = enemy
     gmData.timers[enemy.id] = timer.performWithDelay( 10000, destroyEnemy )
