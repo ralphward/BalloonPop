@@ -16,6 +16,13 @@ local function handlePlayButtonEvent( event )
     end
 end
 
+local function handleSurvivalButtonEvent( event )
+    if ( "ended" == event.phase ) then
+        composer.removeScene( "menu.survival", false )
+        composer.gotoScene("menu.survival", { effect = "fromTop", time = 333 })
+    end
+end
+
 local function handleHelpButtonEvent( event )
     if ( "ended" == event.phase ) then
         composer.showOverlay("menu.help", { effect = "fromTop", time = 333, isModal = true })
@@ -67,9 +74,20 @@ function scene:create( event )
         height = 32,
         onEvent = handlePlayButtonEvent
     })
-    playButton.x = display.contentCenterX
-    playButton.y = display.contentCenterY - 90
+    playButton.x = display.contentCenterX / 2
+    playButton.y = display.contentCenterY - 60
     sceneGroup:insert( playButton )
+
+    local surviveButton = widget.newButton({
+        id = "button1",
+        label = "Survival",
+        width = 100,
+        height = 32,
+        onEvent = handleSurvivalButtonEvent
+    })
+    surviveButton.x = display.contentCenterX * 1.5
+    surviveButton.y = display.contentCenterY - 60
+    sceneGroup:insert( surviveButton )
 
     -- Create the widget
     local settingsButton = widget.newButton({
@@ -79,8 +97,8 @@ function scene:create( event )
         height = 32,
         onEvent = handleSettingsButtonEvent
     })
-    settingsButton.x = display.contentCenterX
-    settingsButton.y = display.contentCenterY - 30
+    settingsButton.x = display.contentCenterX / 2
+    settingsButton.y = display.contentCenterY
     sceneGroup:insert( settingsButton )
 
     -- Create the widget
@@ -91,8 +109,8 @@ function scene:create( event )
         height = 32,
         onEvent = handleHelpButtonEvent
     })
-    helpButton.x = display.contentCenterX
-    helpButton.y = display.contentCenterY + 30
+    helpButton.x = display.contentCenterX * 1.5
+    helpButton.y = display.contentCenterY
     sceneGroup:insert( helpButton )
 
     -- Create the widget
@@ -103,8 +121,8 @@ function scene:create( event )
         height = 32,
         onEvent = handleCreditsButtonEvent
     })
-    creditsButton.x = display.contentCenterX
-    creditsButton.y = display.contentCenterY + 90
+    creditsButton.x = display.contentCenterX / 2
+    creditsButton.y = display.contentCenterY + 60
     sceneGroup:insert( creditsButton )
 
 end

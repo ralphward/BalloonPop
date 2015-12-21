@@ -107,7 +107,15 @@
 			"file": "game/game.lua",
 			"settings":
 			{
-				"buffer_size": 12175,
+				"buffer_size": 12257,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "game/leveldata.lua",
+			"settings":
+			{
+				"buffer_size": 1726,
 				"line_ending": "Windows"
 			}
 		},
@@ -115,15 +123,7 @@
 			"file": "game/enemies.lua",
 			"settings":
 			{
-				"buffer_size": 2653,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "todo.txt",
-			"settings":
-			{
-				"buffer_size": 2584,
+				"buffer_size": 2744,
 				"line_ending": "Windows"
 			}
 		}
@@ -175,10 +175,14 @@
 	],
 	"file_history":
 	[
-		"/C/git/BalloonPop/game/leveldata.lua",
-		"/C/git/BalloonPop/game/gamedata.lua",
-		"/C/git/BalloonPop/main.lua",
 		"/C/git/BalloonPop/todo.txt",
+		"/C/git/BalloonPop/main.lua",
+		"/C/git/BalloonPop/menu/menu.lua",
+		"/C/git/BalloonPop/menu/survival.lua",
+		"/C/git/BalloonPop/menu/levelselect.lua",
+		"/C/git/BalloonPop/game/leveldata.lua",
+		"/C/Users/Shimara/AppData/Local/Corona Labs/Corona Simulator/Sandbox/balloonpop-57EF290E16D987980C58ECF67A085D9E/Documents/settings.json",
+		"/C/git/BalloonPop/game/gamedata.lua",
 		"/C/Users/Shimara/Desktop/PredictingTrajectory/backup.lua",
 		"/C/git/BalloonPop/game/trajectories.lua",
 		"/C/git/BalloonPop/game/game.lua",
@@ -186,10 +190,8 @@
 		"/C/Users/Shimara/Desktop/PredictingTrajectory/main.lua",
 		"/C/git/BalloonPop/game/enemies.lua",
 		"/C/git/BalloonPop/game/pause.lua",
-		"/C/git/BalloonPop/menu/menu.lua",
 		"/C/git/BalloonPop/menu/gamecredits.lua",
 		"/C/git/BalloonPop/game/nextlevel.lua",
-		"/C/git/BalloonPop/menu/levelselect.lua",
 		"/C/git/BalloonPop/config/config.lua",
 		"/C/git/BalloonPop/config/utility.lua",
 		"/C/Users/Shimara/Downloads/config.lua",
@@ -216,7 +218,6 @@
 		"/C/git/BalloonPop/scene1.lua",
 		"/C/git/BalloonPop/nextlevel.lua",
 		"/C/git/BalloonPop/CBE/about.txt",
-		"/C/Users/Shimara/AppData/Local/Corona Labs/Corona Simulator/Sandbox/balloonpop-57EF290E16D987980C58ECF67A085D9E/Documents/settings.json",
 		"/C/git/BalloonPop/config.lua",
 		"/C/git/BalloonPop/enemy.lua",
 		"/C/git/BalloonPop/utility.lua",
@@ -242,6 +243,7 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"handleEnemyTouch",
 			"line",
 			"proj",
 			"circ",
@@ -350,7 +352,7 @@
 	"groups":
 	[
 		{
-			"selected": 0,
+			"selected": 2,
 			"sheets":
 			[
 				{
@@ -359,15 +361,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 12175,
+						"buffer_size": 12257,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								4722,
-								4722
+								938,
+								938
 							]
 						],
 						"settings":
@@ -377,68 +379,69 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 1890.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
-					"type": "text"
-				},
-				{
-					"buffer": 1,
-					"file": "game/enemies.lua",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2653,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								763,
-								763
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Lua/Lua.tmLanguage",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 90.0,
+						"translation.y": 407.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 1,
 					"type": "text"
 				},
 				{
-					"buffer": 2,
-					"file": "todo.txt",
+					"buffer": 1,
+					"file": "game/leveldata.lua",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 2584,
+						"buffer_size": 1726,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
+								275,
+								275
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/Text/Plain text.tmLanguage"
+							"syntax": "Packages/Lua/Lua.tmLanguage",
+							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "game/enemies.lua",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2744,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2468,
+								2476
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Lua/Lua.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 797.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
 					"type": "text"
 				}
 			]

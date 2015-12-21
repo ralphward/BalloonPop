@@ -29,10 +29,11 @@ if myData.settings == nil then
 	myData.settings.unlockedLevels = 1
     myData.settings.bestScore = 0
     myData.settings.levels = {}
-    for i=1,20 do
+    for i=1,22 do
         myData.settings.levels[i] = {}
         myData.settings.levels[i].topScore = 0
     end
+
 	utility.saveTable(myData.settings, "settings.json")
 end
 if myData.settings.bestScore == nil then
