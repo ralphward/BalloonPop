@@ -62,9 +62,10 @@ end
 local function spawnEnemy( event )
     local scene = composer.getScene("game.game")
     local sceneGroup = scene.view  
+
     local collFilter = { categoryBits = 1, maskBits = 2}
 
-    local params = event.source.params
+    local params = event.source.params.artifact
     local enemy = display.newImage(params.image, params.xpos, -50)
     enemy.id = params.id
     sceneGroup:insert( enemy )
@@ -83,10 +84,11 @@ function M:spawnEnemies()
 
     E = levelData:getLevel(curLevel)
     for i, enemy in ipairs(E) do        
-        gmData.timers["z"..enemy.id]  = timer.performWithDelay( enemy.timerDelay , spawnEnemy, 1 )
-        gmData.timers["z"..enemy.id].params = { xpos = enemy.xpos, image = enemy.image, id = enemy.id }
+        gmData.timers["z"..enemy.id]  = timer.performWithDelay( enemy.timerDelay , spawnEnemy, enemy.rep_number )
+        gmData.timers["z"..enemy.id].params = { artifact = enemy }
     end
 
 end
+
 
 return M

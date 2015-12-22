@@ -2,7 +2,7 @@
 TODO::
 ~~~~~~~~~~~~~~
 
-Might Need to re structure a little enemies a little - use levelselect as a guide
+Survival mode should periodically check for more enemies to create - add wave numbers to their parameters
 
 Add ability to win a level
 
@@ -49,6 +49,8 @@ Think of a name
 ~~~~~~~~~~~~~~
 BUGSS::
 ~~~~~~~~~~~~~~
+
+Survival mode can't have infinite objects at the moment - bug when destroying them
 
 ~~~~~~~~~~~~~~
 RESOLVED BUGSS::
@@ -144,4 +146,6 @@ Use correct collision filters
 Add survival mode
 
 Update General ideas to more current idea
+
+Might Need to re structure a little enemies a little - use levelselect as a guide
 
