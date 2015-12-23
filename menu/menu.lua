@@ -7,8 +7,6 @@ local ads = require( "ads" )
 
 local params
 
-local myData = require( "config.mydata" )
-
 local function handlePlayButtonEvent( event )
     if ( "ended" == event.phase ) then
         composer.removeScene( "menu.levelselect", false )

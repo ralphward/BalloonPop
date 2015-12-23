@@ -55,12 +55,16 @@ function resetScore()
 
     gmData.currentScore = 0
     gmData.currentScoreDisplay.text = string.format( "%06d", gmData.currentScore )
-
-    if myData.settings.levels[curLevel].topScore == nil then
-        gmData.currentTopScore.text = string.format( "%06d", gmData.currentScore )
-    else
+    
+    if curLevel > 0 then
         gmData.currentTopScore.text = string.format( "%06d", myData.settings.levels[curLevel].topScore )
         gmData.topScore = myData.settings.levels[curLevel].topScore
+    elseif curLevel == -1 then
+        gmData.currentTopScore.text = string.format( "%06d", myData.settings.survival[curLevel * -1].topScore )
+        gmData.topScore = myData.settings.survival[curLevel * -1].topScore
+    else
+        gmData.currentTopScore.text = string.format( "%06d", myData.settings.survival[curLevel * -1].topScore )
+        gmData.topScore = myData.settings.survival[curLevel * -1].topScore
     end
 
     return true 
@@ -105,22 +109,35 @@ end
 local function handleWin( event )
 
     if event.phase == "ended" then
-        myData.settings.levels[curLevel].topScore = gmData.topScore
-        myData.settings.currentLevel = curLevel + 1
-        if myData.settings.unlockedLevels < myData.settings.currentLevel then
-            myData.settings.unlockedLevels = myData.settings.currentLevel
+        if curLevel > 0 then
+            myData.settings.levels[curLevel].topScore = gmData.topScore
+            myData.settings.currentLevel = curLevel + 1
+            if myData.settings.unlockedLevels < myData.settings.currentLevel then
+                myData.settings.unlockedLevels = myData.settings.currentLevel
+            end
+            utility.saveTable(myData.settings, "settings.json")
+            composer.removeScene("game.nextlevel")
+            composer.gotoScene("game.nextlevel", { time= 500, effect = "crossFade" })
+        else
+            myData.settings.survival[curLevel * -1].topScore = gmData.topScore
+            utility.saveTable(myData.settings, "settings.json")
+            composer.removeScene("game.survivalover")
+            composer.gotoScene("game.survivalover", { time= 500, effect = "crossFade" })
         end
-        utility.saveTable(myData.settings, "settings.json")
-        composer.removeScene("game.nextlevel")
-        composer.gotoScene("game.nextlevel", { time= 500, effect = "crossFade" })
+
     end
     return true
 end
 
 local function handleLoss( event )
     if event.phase == "ended" then
-        composer.removeScene("game.gameover")
-        composer.gotoScene("game.gameover", { time= 500, effect = "crossFade" })
+        if curLevel > 0 then
+            composer.removeScene("game.gameover")
+            composer.gotoScene("game.gameover", { time= 500, effect = "crossFade" })
+        else
+            composer.removeScene("game.survivalover")
+            composer.gotoScene("game.survivalover", { time= 500, effect = "crossFade" })
+        end
     end
     return true
 end

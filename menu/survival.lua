@@ -49,7 +49,7 @@ function scene:create( event )
     --local x = 90
     --local y = 115
     local easyButton = widget.newButton({
-        id = 21,
+        id = -1,
         label = "Easy",
         width = 100,
         height = 32,
@@ -60,7 +60,7 @@ function scene:create( event )
     sceneGroup:insert( easyButton )
 
     local hardButton = widget.newButton({
-        id = 22,
+        id = -2,
         label = "Hard",
         width = 100,
         height = 32,

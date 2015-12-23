@@ -10,9 +10,9 @@ end
 
 function M:getLevel(levelNum)
 
-	if levelNum == 21 then
+	if levelNum == -1 then
 		return M:getLevelEasy()		
-	elseif levelNum == 22 then
+	elseif levelNum == -2 then
 		return M:getLevelHard()		
 	elseif levelNum == 1 then
 		return M:getLevel1()

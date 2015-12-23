@@ -27,17 +27,19 @@ if myData.settings == nil then
     myData.settings.isPaid = false
 	myData.settings.currentLevel = 1
 	myData.settings.unlockedLevels = 1
-    myData.settings.bestScore = 0
     myData.settings.levels = {}
+
     for i=1,22 do
         myData.settings.levels[i] = {}
         myData.settings.levels[i].topScore = 0
     end
+    myData.settings.survival = {}
+    myData.settings.survival[1] = {}
+    myData.settings.survival[1].topScore = 0
+    myData.settings.survival[2] = {}
+    myData.settings.survival[2].topScore = 0
 
 	utility.saveTable(myData.settings, "settings.json")
-end
-if myData.settings.bestScore == nil then
-    myData.settings.bestScore = 0
 end
 
 --

@@ -2,13 +2,13 @@
 TODO::
 ~~~~~~~~~~~~~~
 
+Add a finish screen for survival mode
+
 Survival mode should periodically check for more enemies to create - add wave numbers to their parameters
 
 Add ability to win a level
 
 Add ability to loose a level
-
-Configure survival mode so it doesn't use an actual level number...
 
 Complete level 1
 
@@ -148,4 +148,6 @@ Add survival mode
 Update General ideas to more current idea
 
 Might Need to re structure a little enemies a little - use levelselect as a guide
+
+Configure survival mode so it doesn't use an actual level number...
 
