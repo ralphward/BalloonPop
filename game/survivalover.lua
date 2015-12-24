@@ -9,9 +9,6 @@ local utility = require( "config.utility" )
 local myData = require( "config.mydata" )
 local device = require( "config.device" )
 
-local params
-local newHighScore = false
-
 local function handleButtonEvent( event )
 
     if ( event.phase == "ended" ) then
@@ -28,31 +25,6 @@ local function handleButtonEvent( event )
     return true
 end
 
---[[
-local function showLeaderboard( event )
-    if event.phase == "ended" then
-        gameNetwork.show( "leaderboards", { leaderboard = {timeScope="AllTime"}} )
-    end
-    return true
-end
-
-local function postToGameNetwork()
-    local category = "com.yourdomain.yourgame.leaderboard"
-    if myData.isGPGS then
-        category = "CgkIusrvppwDJFHJKDFg"
-    end
-    gameNetwork.request("setHighScore", {
-        localPlayerScore = {
-            category = category, 
-            value = myData.settings.bestScore
-        },
-        listener = postScoreSubmit
-    })
-end
---]]
---
--- Start the composer event handlers
---
 function scene:create( event )
     local sceneGroup = self.view
 
@@ -68,24 +40,11 @@ function scene:create( event )
     background:setFillColor( 1 )
     sceneGroup:insert(background)
 
-    local gameOverText = display.newText("Game Over", 0, 0, native.systemFontBold, 32 )
+    local gameOverText = display.newText("Survival Game Over", 0, 0, native.systemFontBold, 32 )
     gameOverText:setFillColor( 0 )
     gameOverText.x = display.contentCenterX
     gameOverText.y = 50
     sceneGroup:insert(gameOverText)
-
---[[
-    local leaderBoardButton = widget.newButton({
-        id = "leaderboard",
-        label = "Leaderboard",
-        width = 125,
-        height = 32,
-        onEvent = showLeaderboard
-    })
-    leaderBoardButton.x = display.contentCenterX 
-    leaderBoardButton.y = 225
-    sceneGroup:insert( leaderBoardButton )
-]]--
 
     local doneButton = widget.newButton({
         id = "button1",

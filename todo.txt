@@ -2,15 +2,21 @@
 TODO::
 ~~~~~~~~~~~~~~
 
+Add a finish screen for survival mode
+
+Survival mode should periodically check for more enemies to create - add wave numbers to their parameters
+
 Add ability to win a level
 
 Add ability to loose a level
 
-Might Need to re structure a little enemies a little
-
-Update General ideas to more current idea
-
 Complete level 1
+
+Complete Help System
+
+Fix position of elements for multiple screen resolutions
+
+Build some programmer assets to use in place for now
 
 Clean up interface a lot
  - Levels should display custom tips at the start
@@ -36,9 +42,15 @@ Add Stars for passing levels
 
 adds for the game
 
+Add survival mode online competition
+
+Think of a name
+
 ~~~~~~~~~~~~~~
 BUGSS::
 ~~~~~~~~~~~~~~
+
+Survival mode can't have infinite objects at the moment - bug when destroying them
 
 ~~~~~~~~~~~~~~
 RESOLVED BUGSS::
@@ -77,9 +89,15 @@ Ideas for objects
 Different types of levels
 - Make it through a specified time frame - defend castle for one minute
 - Limited number of clicks with number of objects
-- Colored levels
+- Colored levels - more points for redder balloons
 
 Have a way to build your castle defenses - earn currency from stars
+ - Fire more bullets at once
+ - make bullets piercing
+ - 
+
+ Make it through levels to improve abilities - use improved things in survival mode - survival mode is online competition
+
 
 ~~~~~~~~~~~~~~
 DONE::
@@ -124,3 +142,12 @@ Better firing ability - touch screen is frustrating
 Limit the projectiles better
 
 Use correct collision filters
+
+Add survival mode
+
+Update General ideas to more current idea
+
+Might Need to re structure a little enemies a little - use levelselect as a guide
+
+Configure survival mode so it doesn't use an actual level number...
+
