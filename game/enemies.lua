@@ -8,6 +8,7 @@ local CBE = require("CBE.CBE")
 local vent = require( "game.vent")
 
 local curLevel = myData.settings.currentLevel
+local enemy_count_id = 0
 
 function M:killTimers()
 
@@ -67,7 +68,13 @@ local function spawnEnemy( event )
 
     local params = event.source.params.artifact
     local enemy = display.newImage(params.image, params.xpos, -50)
-    enemy.id = params.id
+    if (curLevel > 0 ) then
+        enemy.id = params.id
+    else
+        enemy.id = enemy_count_id .. params.id
+        enemy_count_id = enemy_count_id + 1
+    end
+    
     sceneGroup:insert( enemy )
     physics.addBody( enemy, "dynamic", { filter = collFilter})
     enemy.gravityScale = 0
