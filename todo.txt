@@ -2,9 +2,7 @@
 TODO::
 ~~~~~~~~~~~~~~
 
-Add a finish screen for survival mode
-
-Survival mode should periodically check for more enemies to create - add wave numbers to their parameters
+Survival mode should periodically check for more enemies to create - add wave numbers to their parameters and reset balloon count
 
 Add ability to win a level
 
@@ -13,6 +11,8 @@ Add ability to loose a level
 Complete level 1
 
 Complete Help System
+
+Build some programmer assets for the screens and objects
 
 Fix position of elements for multiple screen resolutions
 
@@ -50,11 +50,13 @@ Think of a name
 BUGSS::
 ~~~~~~~~~~~~~~
 
-Survival mode can't have infinite objects at the moment - bug when destroying them
+Make the missile flight path largely unaffected by balloon collision
 
 ~~~~~~~~~~~~~~
 RESOLVED BUGSS::
 ~~~~~~~~~~~~~~
+
+Survival mode can't have infinite objects at the moment - bug when destroying them
 
 Balloons explode in the wrong spot
 
@@ -150,4 +152,6 @@ Update General ideas to more current idea
 Might Need to re structure a little enemies a little - use levelselect as a guide
 
 Configure survival mode so it doesn't use an actual level number...
+
+Add a finish screen for survival mode
 
