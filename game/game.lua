@@ -290,6 +290,7 @@ function scene:create( event )
     fire.x = display.contentCenterX - 180
     fire.y = display.contentHeight - 20
 
+    print("level setup completed")
 
 end
 
@@ -314,12 +315,14 @@ function scene:show( event )
         transition.to( levelText, { time = 500, alpha = 0 } )
         gm_timer = timer.performWithDelay( 500, enemies.spawnEnemies )
         gmData.state = "playing"
+        print("level started")
 
     else -- event.phase == "will"
         -- The "will" phase happens before the scene transitions on screen.  This is a great
         -- place to "reset" things that might be reset, i.e. move an object back to its starting
         -- position. Since the scene isn't on screen yet, your users won't see things "jump" to new
         -- locations. In this case, reset the score to 0.
+        print("level reset")
         resetScore()
     end
 end

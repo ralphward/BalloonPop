@@ -64,7 +64,7 @@ Runtime bugs when closing scene's too quickly
 
 enemies not removing correctly when restarting level - check timers remove properly
 
-when hitting restart many times causes removeSelf timing bug for enemy table
+when hitting restart many times removeSelf causes timing bug for enemy table
 
 timers to destroy enemies are not pausing when the level is paused
 

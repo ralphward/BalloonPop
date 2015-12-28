@@ -67,6 +67,11 @@ local function spawnEnemy( event )
     local collFilter = { categoryBits = 1, maskBits = 2}
 
     local params = event.source.params.artifact
+    if curLevel < 0 then
+        params.xpos = math.random(50, 400)
+        print(params.xpos)
+    end
+
     local enemy = display.newImage(params.image, params.xpos, -50)
     if (curLevel > 0 ) then
         enemy.id = params.id
@@ -89,10 +94,15 @@ end
 
 function M:spawnEnemies()
 
+    curLevel = myData.settings.currentLevel
+
     E = levelData:getLevel(curLevel)
     for i, enemy in ipairs(E) do        
         gmData.timers["z"..enemy.id]  = timer.performWithDelay( enemy.timerDelay , spawnEnemy, enemy.rep_number )
         gmData.timers["z"..enemy.id].params = { artifact = enemy }
+    end
+    if curLevel < 0 then
+        --gmData.timers["wave"] = timer.performWithDelay(1000, spawnEnemy, )
     end
 
 end
