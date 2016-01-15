@@ -151,6 +151,14 @@
 			}
 		},
 		{
+			"file": "menu/menu.lua",
+			"settings":
+			{
+				"buffer_size": 4996,
+				"line_ending": "Windows"
+			}
+		},
+		{
 			"file": "todo.txt",
 			"settings":
 			{
@@ -264,7 +272,7 @@
 	],
 	"find":
 	{
-		"height": 34.0
+		"height": 23.0
 	},
 	"find_in_files":
 	{
@@ -394,7 +402,7 @@
 	"groups":
 	[
 		{
-			"selected": 4,
+			"selected": 6,
 			"sheets":
 			[
 				{
@@ -424,7 +432,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 5,
+					"stack_index": 6,
 					"type": "text"
 				},
 				{
@@ -454,7 +462,7 @@
 						"translation.y": 1215.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 5,
 					"type": "text"
 				},
 				{
@@ -484,7 +492,7 @@
 						"translation.y": 1125.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 4,
 					"type": "text"
 				},
 				{
@@ -514,7 +522,7 @@
 						"translation.y": 784.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 3,
 					"type": "text"
 				},
 				{
@@ -530,8 +538,8 @@
 						"selection":
 						[
 							[
-								927,
-								927
+								1014,
+								1014
 							]
 						],
 						"settings":
@@ -540,14 +548,44 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": -0.0,
-						"translation.y": 180.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 0,
+					"stack_index": 2,
 					"type": "text"
 				},
 				{
 					"buffer": 5,
+					"file": "menu/menu.lua",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4996,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2858,
+								2858
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Lua/Lua.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 739.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
 					"file": "todo.txt",
 					"semi_transient": false,
 					"settings":
@@ -559,8 +597,8 @@
 						"selection":
 						[
 							[
-								939,
-								939
+								266,
+								266
 							]
 						],
 						"settings":
@@ -568,10 +606,10 @@
 							"syntax": "Packages/Text/Plain text.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 180.0,
+						"translation.y": 1755.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 0,
 					"type": "text"
 				}
 			]

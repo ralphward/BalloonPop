@@ -11,7 +11,7 @@ local function handleButtonEvent( event )
 
     if ( "ended" == event.phase ) then
         composer.removeScene( "menu.menu", false )
-        composer.gotoScene( "menu.menu", { effect = "slideUp", time = 333 } )
+        composer.gotoScene( "menu.menu", {params = {from = "level"} })
     end
 end
 

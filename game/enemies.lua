@@ -102,7 +102,7 @@ function M:spawnEnemies()
         gmData.timers["z"..enemy.id].params = { artifact = enemy }
     end
     if curLevel < 0 then
-        --gmData.timers["wave"] = timer.performWithDelay(1000, spawnEnemy, )
+        --gmData.timers["wave"] = timer.performWithDelay(1000, spawnRandomEnemy, 0)
     end
 
 end

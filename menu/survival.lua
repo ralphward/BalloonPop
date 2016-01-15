@@ -11,7 +11,7 @@ local function handleButtonEvent( event )
 
     if ( "ended" == event.phase ) then
         composer.removeScene( "menu.menu", false )
-        composer.gotoScene( "menu.menu", { effect = "slideUp", time = 333 } )
+        composer.gotoScene( "menu.menu", {params = {from = "survival"} })
     end
 end
 
@@ -38,6 +38,7 @@ function scene:create( event )
     local background = display.newRect( 0, 0, 570, 360)
     background.x = display.contentCenterX
     background.y = display.contentCenterY
+    background.fill = {252/255, 45/255, 121/255}
     sceneGroup:insert(background)
 
     local selectLevelText = display.newText("Survival Mode Select", 125, 32, native.systemFontBold, 32)

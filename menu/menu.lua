@@ -7,37 +7,66 @@ local ads = require( "ads" )
 
 local params
 
+local playButton
+local creditsButton
+local helpButton
+local surviveButton
+local settingsButton
+
+local function playEvent(event)
+    composer.removeScene( event.source.params.sceneName, false )
+    composer.gotoScene(event.source.params.sceneName)
+end
+
 local function handlePlayButtonEvent( event )
     if ( "ended" == event.phase ) then
-        composer.removeScene( "menu.levelselect", false )
-        composer.gotoScene("menu.levelselect", { effect = "fromTop", time = 333 })
+        event.target:setLabel("")
+        event.target:toFront()
+        transition.to(event.target, {time=333, xScale=10, yScale=10})
+        local tm = timer.performWithDelay(333, playEvent)
+        tm.params = {sceneName = "menu.levelselect"}
     end
 end
 
 local function handleSurvivalButtonEvent( event )
     if ( "ended" == event.phase ) then
-        composer.removeScene( "menu.survival", false )
-        composer.gotoScene("menu.survival", { effect = "fromTop", time = 333 })
+        event.target:setLabel("")
+        event.target:toFront()
+        transition.to(event.target, {time=333, xScale=10, yScale=10})
+        local tm = timer.performWithDelay(333, playEvent)
+        tm.params = {sceneName = "menu.survival"}
     end
 end
 
 local function handleHelpButtonEvent( event )
     if ( "ended" == event.phase ) then
-        composer.showOverlay("menu.help", { effect = "fromTop", time = 333, isModal = true })
+        event.target:setLabel("")
+        event.target:toFront()
+        transition.to(event.target, {time=333, xScale=10, yScale=10})
+        local tm = timer.performWithDelay(333, playEvent)
+        tm.params = {sceneName = "menu.help"}
     end
 end
 
 local function handleCreditsButtonEvent( event )
 
     if ( "ended" == event.phase ) then
-        composer.showOverlay("menu.gamecredits", { effect = "fromTop", time = 333, isModal = true })
+        event.target:setLabel("")
+        event.target:toFront()
+        transition.to(event.target, {time=333, xScale=10, yScale=10})
+        local tm = timer.performWithDelay(333, playEvent)
+        tm.params = {sceneName = "menu.gamecredits"}
     end
 end
 
 local function handleSettingsButtonEvent( event )
 
     if ( "ended" == event.phase ) then
-        composer.showOverlay("menu.gamesettings", { effect = "fromTop", time = 333, isModal = true })
+        event.target:setLabel("")
+        event.target:toFront()
+        transition.to(event.target, {time=333, xScale=10, yScale=10})
+        local tm = timer.performWithDelay(333, playEvent)
+        tm.params = {sceneName = "menu.gamesettings"}
     end
 end
 
@@ -67,72 +96,72 @@ function scene:create( event )
     sceneGroup:insert( background )
 
     -- Create the widget
-    local playButton = widget.newButton({
+    playButton = widget.newButton({
         id = "button1",
         shape = "circle",
         fillColor = {default=blue_green, over=blue_green},
         label = "Play",
-        width = 100,
-        height = 32,
+        radius = 50,
         onEvent = handlePlayButtonEvent
     })
     playButton.x = display.contentCenterX
     playButton.y = display.contentCenterY
+
     sceneGroup:insert( playButton )
 
-    local surviveButton = widget.newButton({
+    surviveButton = widget.newButton({
         id = "button1",
         label = "Survival",
         shape = "circle",
         fillColor = {default=pink, over=pink},
-        width = 100,
-        height = 32,
+        radius = 50,
         onEvent = handleSurvivalButtonEvent
     })
     surviveButton.x = display.contentCenterX / 2
     surviveButton.y = display.contentCenterY / 2
+
     sceneGroup:insert( surviveButton )
 
     -- Create the widget
-    local settingsButton = widget.newButton({
+    settingsButton = widget.newButton({
         id = "button2",
         label = "Settings",
         shape = "circle",
         fillColor = {default=blue, over=blue},
-        width = 100,
-        height = 32,
+        radius = 50,
         onEvent = handleSettingsButtonEvent
     })
     settingsButton.x = display.contentCenterX / 2
     settingsButton.y = display.contentCenterY * 1.5
+
     sceneGroup:insert( settingsButton )
 
     -- Create the widget
-    local helpButton = widget.newButton({
+    helpButton = widget.newButton({
         id = "button3",
         label = "Help",
         shape = "circle",
         fillColor = {default=yellow, over=yellow},
-        width = 100,
-        height = 32,
+        radius = 50,
         onEvent = handleHelpButtonEvent
     })
     helpButton.x = display.contentCenterX * 1.5
     helpButton.y = display.contentCenterY / 2
+
     sceneGroup:insert( helpButton )
 
     -- Create the widget
-    local creditsButton = widget.newButton({
+    creditsButton = widget.newButton({
         id = "button4",
         label = "Credits",
         shape = "circle",
         fillColor = {default=green, over=green},
-        width = 100,
-        height = 32,
+        radius = 50,
         onEvent = handleCreditsButtonEvent
     })
     creditsButton.x = display.contentCenterX * 1.5
     creditsButton.y = display.contentCenterY * 1.5
+
     sceneGroup:insert( creditsButton )
 
 end
@@ -147,9 +176,45 @@ function scene:show( event )
         print(params.someKey)
         print(params.someOtherKey)
     end
+    if event.phase == "will" then
+        if event.params == nil then
+            playButton:setLabel("Play")
+            playButton.xScale = 0.1
+            playButton.yScale = 0.1
 
-    if event.phase == "did" then
+            surviveButton:setLabel("Survival")
+            surviveButton.xScale = 0.01
+            surviveButton.yScale = 0.01
+
+            settingsButton:setLabel("Settings")
+            settingsButton.xScale = 0.01
+            settingsButton.yScale = 0.01
+
+            helpButton:setLabel("Help")
+            helpButton.xScale = 0.01
+            helpButton.yScale = 0.01
+
+            creditsButton:setLabel("Credits")
+            creditsButton.xScale = 0.01
+            creditsButton.yScale = 0.01
+        elseif event.params.from == "survival" then
+            surviveButton:setLabel("")
+            surviveButton.xScale = 10
+            surviveButton.yScale = 10            
+        end            
+    elseif event.phase == "did" then
         composer.removeScene( "game" ) 
+
+        if event.params == nil then
+            transition.to(playButton, {time=600, xScale=1, yScale=1, transition=easing.outBounce})
+            transition.to(surviveButton, {time=600, delay=100, xScale=1, yScale=1, transition=easing.outBounce})
+            transition.to(settingsButton, {time=600, delay=200, xScale=1, yScale=1, transition=easing.outBounce})
+            transition.to(helpButton, {time=600, delay=300, xScale=1, yScale=1, transition=easing.outBounce})
+            transition.to(creditsButton, {time=600, delay=400,  xScale=1, yScale=1, transition=easing.outBounce})
+        elseif event.params.from == "survival" then
+            surviveButton:toFront()
+            transition.to(surviveButton, {time=600, delay=100, xScale=1, yScale=1, transition=easing.outBounce})
+        end
     end
 end
 
